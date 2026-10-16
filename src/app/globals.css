@@ -1,0 +1,1440 @@
+@import "tailwindcss";
+@import "../styles/clobe/tokens.css";
+@import "../styles/clobe/measured.css";
+@import "../styles/clobe/shell.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@font-face {
+  font-family: "Pretendard Variable";
+  src: url("/fonts/PretendardVariable.woff2") format("woff2-variations");
+  font-weight: 45 920;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* 캔버스는 카드(순백)보다 확실히 한 톤 아래(L 0.97) — 표면 위계가 보이게.
+     이전 0.985는 흰 카드와 L 차이가 0.015뿐이라 카드 경계가 실선에만 의존했다. */
+  --background: var(--clobe-color-bg-default);
+  --foreground: var(--clobe-color-fg-default);
+  --font-geist-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color-scheme: light !important;
+
+  /* Motion easing tokens (SSOT). The built-in CSS easings are too weak — they
+     lack the punch that makes UI motion feel intentional. Reach for these
+     instead of bare `ease-out`/`ease-in-out`. Never `ease-in` on UI: it delays
+     the first frame, the exact moment the eye is on the element.
+     Namespaced `--motion-*` on purpose: Tailwind v4 already ships `--ease-out`
+     / `--ease-in-out` for its easing utilities, so we don't shadow those.
+       --motion-ease-out     strong ease-out for enter/exit + press feedback
+       --motion-ease-in-out  on-screen movement / morphing
+       --motion-ease-drawer  iOS-like drawer/sheet curve (Ionic) */
+  --motion-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --motion-ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --motion-ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
+  /* bklit 차트 토큰 (additive). bklit 컴포넌트가 var(--chart-*)로 직접 참조한다.
+     기존 토큰은 안 건드린다. 강조 라인/면은 브랜드 그린 #00BD7D, 보조는 sky/amber
+     (보라/라벤더는 색 규칙상 쓰지 않는다). 그리드·툴팁·라벨은 중립 그레이. */
+  --chart-1: oklch(0.705 0.159 160.188);
+  --chart-2: oklch(0.685 0.148 237.323);
+  --chart-3: oklch(0.769 0.165 70.08);
+  --chart-4: oklch(0.704 0.123 182.503);
+  --chart-5: oklch(0.711 0.035 256.788);
+  --chart-background: oklch(1 0 0);
+  --chart-foreground: oklch(0.145 0.004 285);
+  --chart-foreground-muted: oklch(0.55 0.014 260);
+  --chart-line-primary: var(--chart-1);
+  --chart-line-secondary: var(--chart-2);
+  --chart-crosshair: oklch(0.705 0.159 160.188);
+  --chart-grid: oklch(0.92 0 0);
+  --chart-brush-border: var(--chart-grid);
+  --chart-tooltip-background: oklch(0.21 0.006 285 / 0.92);
+  --chart-tooltip-foreground: oklch(0.985 0 0);
+  --chart-tooltip-muted: oklch(0.7 0.01 260);
+  --chart-marker-background: oklch(1 0 0);
+  --chart-marker-border: oklch(0.85 0.01 260);
+  --chart-marker-foreground: oklch(0.3 0.01 260);
+  --chart-label: oklch(0.5 0.01 260);
+
+  /* dither-kit 토큰 (additive). dither-kit 컴포넌트가 shadcn 표준 이름
+     (popover/muted-foreground/border)으로 참조한다. 기존 토큰 값에 연결만 한다. */
+  --popover: oklch(1 0 0);
+  --popover-foreground: var(--foreground);
+  --muted-foreground: var(--chart-foreground-muted);
+  --border: var(--chart-grid);
+
+  /* fluid 버튼 토큰 (components/ui/button.tsx). secondary 채움/hover/active 는
+     대시보드 중성 회색 계열, 포커스 링은 액션 색 규칙(emerald-700)을 따른다. */
+  --accent: oklch(0.925 0 0);
+  --hover: rgba(10, 10, 10, 0.04);
+  --active: rgba(10, 10, 10, 0.07);
+  --focus-ring: var(--clobe-color-blue-500);
+
+  /* beUI 토큰 다리 (additive, 2026-08-30). beui.dev 레지스트리 컴포넌트가
+     shadcn 표준 이름(bg-primary / bg-muted / text-destructive / ring-ring …)으로
+     색을 참조한다. Tailwind v4 는 @theme 에 없는 이름의 유틸을 아예 만들지 않아
+     토큰이 없으면 색이 통째로 사라진다 — 그래서 값이 아니라 "이름"을 잇는다.
+     primary 는 대시보드 액션 색 규칙(emerald-700)에 맞춰 둔다: 라이브러리 기본
+     버튼이 자동으로 우리 브랜드 색이 되고, 보라/라벤더가 새로 생기지 않는다. */
+  --card: oklch(1 0 0);
+  --card-foreground: var(--foreground);
+  --muted: oklch(0.968 0 0);
+  --primary: var(--clobe-color-action-neutral);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.968 0 0);
+  --secondary-foreground: var(--foreground);
+  --accent-foreground: var(--foreground);
+  --destructive: oklch(0.577 0.245 27.325);
+  --ring: var(--clobe-color-blue-500);
+  --border-strong: oklch(0.87 0 0);
+  --success: oklch(0.705 0.159 160.188);
+  --warning: oklch(0.769 0.165 70.08);
+  /* Kakao delivery workspace. Geometry, depth, typography, and controls stay
+     named here so the selected prototype remains one coherent UI system. */
+  --kakao-delivery-layer: 2147483647;
+  --kakao-delivery-width: 55rem;
+  --kakao-delivery-height: 47.5rem;
+  --kakao-delivery-message-min-height: 26.25rem;
+  --kakao-delivery-companion-width: 17.5rem;
+  --kakao-delivery-overlay: rgb(10 10 10 / 0.45);
+  --kakao-delivery-edge-subtle: rgb(10 10 10 / 0.05);
+  --kakao-delivery-edge-default: rgb(10 10 10 / 0.10);
+  --kakao-delivery-surface-soft: rgb(10 10 10 / 0.018);
+  --kakao-delivery-surface-hover: rgb(10 10 10 / 0.025);
+  --kakao-delivery-surface-tab: rgb(10 10 10 / 0.06);
+  --kakao-delivery-surface-tab-hover: rgb(10 10 10 / 0.03);
+  --kakao-delivery-divider-bottom: 0 1px 0 0 var(--kakao-delivery-edge-subtle);
+  --kakao-delivery-divider-top: 0 -1px 0 0 var(--kakao-delivery-edge-subtle);
+  --kakao-delivery-focus-ring: 0 0 0 2px rgb(5 150 105 / 0.3);
+  --kakao-delivery-text-body: 0.8125rem;
+  --kakao-delivery-text-field: 0.75rem;
+  --kakao-delivery-text-caption: 0.6875rem;
+  --kakao-delivery-text-meta: 0.625rem;
+  --kakao-delivery-body-leading: 1.75;
+  --kakao-delivery-toggle-width: 2.25rem;
+  --kakao-delivery-toggle-height: 1.25rem;
+  --kakao-delivery-toggle-thumb: 1rem;
+  --kakao-delivery-toggle-inset: 0.125rem;
+  --kakao-delivery-toggle-travel: 1.125rem;
+  --surface-1: #FAFAFA;
+  --surface-2: #FCFCFC;
+  --surface-3: #FFFFFF;
+  --surface-4: #FFFFFF;
+  --surface-5: #FFFFFF;
+  --surface-6: #FFFFFF;
+  --surface-7: #FFFFFF;
+  --surface-8: #FFFFFF;
+  --shadow-color: rgb(0 0 0 / 0.06);
+  --shadow-1: 0 0 0 1px var(--shadow-color);
+  --shadow-2: 0 0 0 1px var(--shadow-color), 0 1px 1px -0.5px var(--shadow-color);
+  --shadow-3: 0 0 0 1px var(--shadow-color), 0 1px 1px -0.5px var(--shadow-color), 0 3px 3px -1.5px var(--shadow-color);
+  --shadow-4: 0 0 0 1px var(--shadow-color), 0 1px 1px -0.5px var(--shadow-color), 0 3px 3px -1.5px var(--shadow-color), 0 6px 6px -3px var(--shadow-color);
+  --shadow-5: 0 0 0 1px var(--shadow-color), 0 1px 1px -0.5px var(--shadow-color), 0 3px 3px -1.5px var(--shadow-color), 0 6px 6px -3px var(--shadow-color), 0 12px 12px -6px var(--shadow-color);
+  --shadow-6: 0 0 0 1px var(--shadow-color), 0 1px 1px -0.5px var(--shadow-color), 0 3px 3px -1.5px var(--shadow-color), 0 6px 6px -3px var(--shadow-color), 0 12px 12px -6px var(--shadow-color), 0 24px 24px -12px var(--shadow-color);
+  --shadow-7: 0 0 0 1px var(--shadow-color), 0 1px 1px -0.5px var(--shadow-color), 0 3px 3px -1.5px var(--shadow-color), 0 6px 6px -3px var(--shadow-color), 0 12px 12px -6px var(--shadow-color), 0 24px 24px -12px var(--shadow-color), 0 48px 48px -24px var(--shadow-color);
+  --shadow-8: 0 0 0 1px var(--shadow-color), 0 1px 1px -0.5px var(--shadow-color), 0 3px 3px -1.5px var(--shadow-color), 0 6px 6px -3px var(--shadow-color), 0 12px 12px -6px var(--shadow-color), 0 24px 24px -12px var(--shadow-color), 0 48px 48px -24px var(--shadow-color), 0 96px 96px -48px var(--shadow-color);
+  --selected: #D4D4D4;
+  --destructive-light: #FEF2F2;
+  --overlay: 0 0 0;
+  --checker-a: #bbbbbb;
+  --checker-b: #ffffff;
+}
+
+
+/* Clobe 디자인 시스템 팔레트. Tailwind 색 이름을 Clobe 토큰에 다시 잇는다.
+   화면마다 클래스를 고치지 않고 한 곳에서 전체 앱의 색을 바꾸는 다리다.
+   강조(emerald)는 Clobe 정보 파랑, 경고(amber)는 주황, 위험(rose)은 빨강으로 간다. */
+@theme {
+  --color-neutral-50: var(--clobe-color-gray-50);
+  --color-neutral-100: var(--clobe-color-gray-100);
+  --color-neutral-200: var(--clobe-color-gray-200);
+  --color-neutral-300: var(--clobe-color-gray-300);
+  --color-neutral-400: var(--clobe-color-gray-400);
+  --color-neutral-500: var(--clobe-color-gray-500);
+  --color-neutral-600: var(--clobe-color-gray-600);
+  --color-neutral-700: var(--clobe-color-gray-700);
+  --color-neutral-800: var(--clobe-color-gray-800);
+  --color-neutral-900: var(--clobe-color-gray-900);
+  --color-neutral-950: var(--clobe-color-gray-900);
+  --color-emerald-50: var(--clobe-color-blue-50);
+  --color-emerald-100: var(--clobe-color-blue-100);
+  --color-emerald-200: var(--clobe-color-blue-200);
+  --color-emerald-300: var(--clobe-color-blue-300);
+  --color-emerald-400: var(--clobe-color-blue-400);
+  --color-emerald-500: var(--clobe-color-blue-500);
+  --color-emerald-600: var(--clobe-color-blue-600);
+  --color-emerald-700: var(--clobe-color-blue-700);
+  --color-emerald-800: var(--clobe-color-blue-800);
+  --color-emerald-900: var(--clobe-color-blue-900);
+  --color-emerald-950: var(--clobe-color-blue-900);
+  --color-sky-50: var(--clobe-color-blue-50);
+  --color-sky-100: var(--clobe-color-blue-100);
+  --color-sky-200: var(--clobe-color-blue-200);
+  --color-sky-300: var(--clobe-color-blue-300);
+  --color-sky-400: var(--clobe-color-blue-400);
+  --color-sky-500: var(--clobe-color-blue-500);
+  --color-sky-600: var(--clobe-color-blue-600);
+  --color-sky-700: var(--clobe-color-blue-700);
+  --color-sky-800: var(--clobe-color-blue-800);
+  --color-sky-900: var(--clobe-color-blue-900);
+  --color-sky-950: var(--clobe-color-blue-900);
+  --color-blue-50: var(--clobe-color-blue-50);
+  --color-blue-100: var(--clobe-color-blue-100);
+  --color-blue-200: var(--clobe-color-blue-200);
+  --color-blue-300: var(--clobe-color-blue-300);
+  --color-blue-400: var(--clobe-color-blue-400);
+  --color-blue-500: var(--clobe-color-blue-500);
+  --color-blue-600: var(--clobe-color-blue-600);
+  --color-blue-700: var(--clobe-color-blue-700);
+  --color-blue-800: var(--clobe-color-blue-800);
+  --color-blue-900: var(--clobe-color-blue-900);
+  --color-blue-950: var(--clobe-color-blue-900);
+  --color-green-50: var(--clobe-color-green-50);
+  --color-green-100: var(--clobe-color-green-100);
+  --color-green-200: var(--clobe-color-green-200);
+  --color-green-300: var(--clobe-color-green-300);
+  --color-green-400: var(--clobe-color-green-400);
+  --color-green-500: var(--clobe-color-green-500);
+  --color-green-600: var(--clobe-color-green-600);
+  --color-green-700: var(--clobe-color-green-700);
+  --color-green-800: var(--clobe-color-green-800);
+  --color-green-900: var(--clobe-color-green-900);
+  --color-green-950: var(--clobe-color-green-900);
+  --color-rose-50: var(--clobe-color-red-50);
+  --color-rose-100: var(--clobe-color-red-100);
+  --color-rose-200: var(--clobe-color-red-200);
+  --color-rose-300: var(--clobe-color-red-300);
+  --color-rose-400: var(--clobe-color-red-400);
+  --color-rose-500: var(--clobe-color-red-500);
+  --color-rose-600: var(--clobe-color-red-600);
+  --color-rose-700: var(--clobe-color-red-700);
+  --color-rose-800: var(--clobe-color-red-800);
+  --color-rose-900: var(--clobe-color-red-900);
+  --color-rose-950: var(--clobe-color-red-900);
+  --color-red-50: var(--clobe-color-red-50);
+  --color-red-100: var(--clobe-color-red-100);
+  --color-red-200: var(--clobe-color-red-200);
+  --color-red-300: var(--clobe-color-red-300);
+  --color-red-400: var(--clobe-color-red-400);
+  --color-red-500: var(--clobe-color-red-500);
+  --color-red-600: var(--clobe-color-red-600);
+  --color-red-700: var(--clobe-color-red-700);
+  --color-red-800: var(--clobe-color-red-800);
+  --color-red-900: var(--clobe-color-red-900);
+  --color-red-950: var(--clobe-color-red-900);
+  --color-amber-50: var(--clobe-color-orange-50);
+  --color-amber-100: var(--clobe-color-orange-100);
+  --color-amber-200: var(--clobe-color-orange-200);
+  --color-amber-300: var(--clobe-color-orange-300);
+  --color-amber-400: var(--clobe-color-orange-400);
+  --color-amber-500: var(--clobe-color-orange-500);
+  --color-amber-600: var(--clobe-color-orange-600);
+  --color-amber-700: var(--clobe-color-orange-700);
+  --color-amber-800: var(--clobe-color-orange-800);
+  --color-amber-900: var(--clobe-color-orange-900);
+  --color-amber-950: var(--clobe-color-orange-900);
+  --color-orange-50: var(--clobe-color-orange-50);
+  --color-orange-100: var(--clobe-color-orange-100);
+  --color-orange-200: var(--clobe-color-orange-200);
+  --color-orange-300: var(--clobe-color-orange-300);
+  --color-orange-400: var(--clobe-color-orange-400);
+  --color-orange-500: var(--clobe-color-orange-500);
+  --color-orange-600: var(--clobe-color-orange-600);
+  --color-orange-700: var(--clobe-color-orange-700);
+  --color-orange-800: var(--clobe-color-orange-800);
+  --color-orange-900: var(--clobe-color-orange-900);
+  --color-orange-950: var(--clobe-color-orange-900);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  /* Geist Sans for the UI, Geist Mono for numbers/IDs — siblings, so sans and
+     mono share one designed family. Hangul falls back to Apple SD Gothic Neo
+     (then Pretendard if present) so Korean reads as intentional, not random
+     system text. */
+  --font-sans: var(--cds-font-family-base);
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* 카드 표면 그림자 토큰 → shadow-card 유틸. near(1px)+ambient(12px) 2겹.
+     .card 와 raw 카드 컨테이너가 같은 깊이를 공유하는 SSOT. */
+  --shadow-card: var(--cds-shadow-v2-l1);
+  /* 클릭 가능한 카드의 hover 상승 단계. base보다 살짝 넓고 깊게. */
+  --shadow-card-hover: var(--cds-shadow-v2-l2);
+
+  /* bklit 차트 색 유틸 매핑 (text-chart-*, bg-chart-* 등). 정상 더블하이픈. */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-chart-foreground: var(--chart-foreground);
+  --color-chart-foreground-muted: var(--chart-foreground-muted);
+  --color-chart-grid: var(--chart-grid);
+  --color-chart-label: var(--chart-label);
+  --color-chart-tooltip-background: var(--chart-tooltip-background);
+  --color-chart-tooltip-foreground: var(--chart-tooltip-foreground);
+  --color-chart-tooltip-muted: var(--chart-tooltip-muted);
+
+  /* dither-kit 유틸 매핑 (bg-popover, text-muted-foreground, stroke-border 등) */
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+
+  /* fluid 버튼 유틸 매핑 (bg-accent, bg-hover, bg-active) */
+  --color-accent: var(--accent);
+  --color-hover: var(--hover);
+  --color-active: var(--active);
+
+  /* beUI 유틸 매핑 (bg-primary, bg-muted, bg-card, text-destructive, ring-ring …) */
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-ring: var(--ring);
+  --color-border-strong: var(--border-strong);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-surface-4: var(--surface-4);
+  --color-surface-5: var(--surface-5);
+  --color-surface-6: var(--surface-6);
+  --color-surface-7: var(--surface-7);
+  --color-surface-8: var(--surface-8);
+  --shadow-surface-1: var(--shadow-1);
+  --shadow-surface-2: var(--shadow-2);
+  --shadow-surface-3: var(--shadow-3);
+  --shadow-surface-4: var(--shadow-4);
+  --shadow-surface-5: var(--shadow-5);
+  --shadow-surface-6: var(--shadow-6);
+  --shadow-surface-7: var(--shadow-7);
+  --shadow-surface-8: var(--shadow-8);
+  --color-dm-drop: var(--dm-drop);
+  --color-dm-ring-high: var(--dm-ring-high);
+  --color-dm-ring-mid: var(--dm-ring-mid);
+  --color-dm-ring-base: var(--dm-ring-base);
+  --color-dm-hi-peak: var(--dm-hi-peak);
+  --color-dm-hi-high: var(--dm-hi-high);
+  --color-dm-hi-mid: var(--dm-hi-mid);
+  --color-dm-hi-base: var(--dm-hi-base);
+  --shadow-8: var(--shadow-8);
+  --shadow-7: var(--shadow-7);
+  --shadow-6: var(--shadow-6);
+  --shadow-5: var(--shadow-5);
+  --shadow-4: var(--shadow-4);
+  --shadow-3: var(--shadow-3);
+  --shadow-2: var(--shadow-2);
+  --shadow-1: var(--shadow-1);
+  --color-shadow-color: var(--shadow-color);
+  @keyframes spinner-move {
+  to {
+    stroke-dashoffset: -100;
+    }
+  }
+  @keyframes spinner-dash {
+  0%, 100% {
+    stroke-dasharray: 15 85;
+    }
+  50% {
+    stroke-dasharray: 40 60;
+    }
+  }
+  @keyframes shimmer {
+  0% {
+    background-position: 0% 0;
+    }
+  100% {
+    background-position: 100% 0;
+    }
+  }
+  --color-selected: var(--selected);
+  --color-destructive-light: var(--destructive-light);
+  --color-focus-ring: var(--focus-ring);
+  --overlay: var(--overlay)
+;
+  --color-checker-b: var(--checker-b);
+  --color-checker-a: var(--checker-a);
+  @keyframes sf-reveal-start {
+  from {
+    --sf-start: 1;
+    }
+  to {
+    --sf-start: 0;
+    }
+  }
+  @keyframes sf-reveal-end {
+  from {
+    --sf-end: 0;
+    }
+  to {
+    --sf-end: 1;
+    }
+  }
+  @keyframes sf-divider-start {
+  from {
+    opacity: 0;
+    }
+  to {
+    opacity: 1;
+    }
+  }
+  @keyframes sf-divider-end {
+  from {
+    opacity: 1;
+    }
+  to {
+    opacity: 0;
+    }
+  }}
+
+/* fluid 버튼 로딩 스피너. inline style 로 참조하므로 @theme 밖 일반 CSS 에 둔다
+   (@theme 안의 keyframes 는 --animate-* 토큰으로 쓸 때만 CSS 로 나온다). */
+@keyframes spinner-move {
+  to {
+    stroke-dashoffset: -100;
+  }
+}
+@keyframes spinner-dash {
+  0%,
+  100% {
+    stroke-dasharray: 15 85;
+  }
+  50% {
+    stroke-dasharray: 40 60;
+  }
+}
+
+/* em 자간은 px 값으로 상속되므로 요소마다 다시 걸어 각자 글자 크기의 -0.02em 을 지킨다.
+   base 층에 두어 tracking-* 유틸리티가 이긴다. */
+@layer base {
+  *, *::before, *::after { letter-spacing: var(--cds-tracking); }
+}
+
+html,
+html * {
+  color-scheme: light !important;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  /* next/font emits --font-geist-sans on <html>; the @theme inline block does
+     NOT expose --font-sans as a :root variable, so reference the raw var here. */
+  font-family: var(--cds-font-family-base);
+  /* Clobe 기본 본문 14px. 자간은 아래 * 규칙이 요소마다 -0.02em 으로 건다. */
+  font-size: 14px;
+  line-height: 1.45;
+  letter-spacing: var(--cds-tracking);
+  font-feature-settings: "liga" 1, "calt" 1;
+  /* Missing weights/styles must fail visibly, never render as browser-faked
+     bold/italic (better-typography #3). */
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  /* Avoid single-word orphans in any wrapped body copy. Headings opt into
+     `balance` via .text-display / .text-heading below. */
+  text-wrap: pretty;
+}
+
+/* Force light color scheme on all elements to override system dark mode */
+*,
+*::before,
+*::after {
+  border-color: inherit;
+}
+
+input,
+textarea,
+select,
+button {
+  color-scheme: light !important;
+}
+
+textarea,
+input[type="text"],
+input[type="email"],
+input[type="search"],
+input[type="number"],
+input[type="tel"],
+input[type="url"],
+input[type="password"],
+input[type="date"],
+input[type="datetime-local"] {
+  background-color: oklch(1 0 0);
+  color: oklch(0.205 0 0);
+}
+
+/* neutral-500: 이전 neutral-400(2.5:1)은 WCAG AA 미달. 4.7:1로 올리되
+   입력 텍스트(L 0.205)와는 여전히 뚜렷이 구분된다. */
+textarea::placeholder,
+input::placeholder {
+  color: oklch(0.556 0 0);
+}
+
+/* 링크 밑줄은 브라우저 임의값 대신 폰트 메트릭에서 가져온다 (better-typography #14). */
+a {
+  text-underline-position: from-font;
+  text-decoration-thickness: from-font;
+}
+
+/* 선택 영역에 브랜드 그린을 은은하게. 전경색은 건드리지 않아 가독성 유지. */
+::selection {
+  background: oklch(0.705 0.159 160.188 / 0.22);
+}
+
+@keyframes checkmark {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Border beam: a single light segment traveling the card perimeter to
+ * signal "this surface is generating right now" (see border-beam.tsx).
+ * Pure CSS via offset-distance so it's deterministic and needs no JS
+ * runtime. Brand green per the generation-accent rule (no violet). */
+@keyframes border-beam {
+  to { offset-distance: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .border-beam-seg { animation: none; opacity: 0; }
+}
+
+.todo-checked {
+  animation: checkmark 0.15s var(--motion-ease-out);
+}
+
+/* --- Notification toast (app alert SSOT, see toast.tsx) ------------- *
+ * Toasts live at bottom-center, so they enter from below (spatial
+ * consistency with where they sit) with a subtle scale + fade. Entrance
+ * uses @starting-style so there's no first-frame flash and no mount JS.
+ * Exit is faster than enter (asymmetric: the system responding should
+ * snap) and is driven by a data-leaving flag from React.
+ * Transitions, not keyframes — toasts stack/dismiss rapidly and must
+ * retarget from their current state, not restart from zero. */
+.toast-item {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition: opacity 260ms var(--motion-ease-out), transform 260ms var(--motion-ease-out);
+}
+@starting-style {
+  .toast-item {
+    opacity: 0;
+    transform: translateY(14px) scale(0.96);
+  }
+}
+.toast-item[data-leaving="true"] {
+  opacity: 0;
+  transform: translateY(8px) scale(0.97);
+  transition: opacity 160ms var(--motion-ease-out), transform 160ms var(--motion-ease-out);
+}
+
+/* --- Context menu (cursor popover, see context-menu.tsx) ------------ *
+ * A trigger-anchored popover must scale from where it was summoned, not
+ * from center. The cursor sits at the menu's corner, so --menu-origin is
+ * set inline to that corner (flips when the menu is clamped off-screen). */
+.context-menu-pop {
+  transform-origin: var(--menu-origin, top left);
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 150ms var(--motion-ease-out), transform 150ms var(--motion-ease-out);
+}
+@starting-style {
+  .context-menu-pop {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+/* --- 협업 확인 요청 (collab-board.tsx) ----------------------------- *
+ * 상대가 결과물을 넘기면 뜨는 팝업과, 폴링을 타고 나타나는 확인함·확인 대기
+ * 패널. 셋 다 사용자가 하루 몇 번 볼까 말까 한 빈도라 표준 진입 모션을 준다
+ * (자주 보는 것도, 키보드로 부르는 것도 아니다).
+ *
+ * 목적은 "갑자기 튀어나오는 걸 막는 것" 하나다. 20초 폴링이 화면을 보고 있는
+ * 도중에 패널을 꽂아 넣으므로, 모션이 없으면 없던 게 순간이동으로 생긴다.
+ * 전부 @starting-style 진입이라 마운트 JS도, 첫 프레임 깜빡임도 없다. */
+.collab-ack-backdrop,
+.modal-backdrop {
+  opacity: 1;
+  transition: opacity 200ms var(--motion-ease-out);
+}
+@starting-style {
+  .collab-ack-backdrop,
+  .modal-backdrop {
+    opacity: 0;
+  }
+}
+/* 모달은 트리거에 매달린 팝오버가 아니라 화면 한가운데 뜨는 것이므로
+   transform-origin 은 center 그대로 둔다 (팝오버 원점 규칙의 예외).
+   .modal-* 은 이 레시피의 앱 공용 이름 — 새 모달은 이 두 클래스를 쓴다. */
+.collab-ack-panel,
+.modal-panel {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 200ms var(--motion-ease-out), transform 200ms var(--motion-ease-out);
+}
+@starting-style {
+  .collab-ack-panel,
+  .modal-panel {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+/* 계단 공개·아코디언 상세 등 제자리에서 나타나는 블록. 빈도가 높은 자리라
+   150ms + 4px — 거의 안 느껴질 만큼만. 닫힘은 즉시(읽기를 막지 않는다). */
+.reveal-step {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 150ms var(--motion-ease-out), transform 150ms var(--motion-ease-out);
+}
+@starting-style {
+  .reveal-step {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+/* 아래에서 떠오르는 바텀 시트(모바일 더보기 등). 시트 곡선은 drawer 토큰. */
+.sheet-enter {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 250ms var(--motion-ease-drawer), transform 250ms var(--motion-ease-drawer);
+}
+@starting-style {
+  .sheet-enter {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+/* 우측 패널에 끼어드는 섹션: 아래에서 살짝 올라온다(자리 잡는 방향과 일치). */
+.collab-panel-enter {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 200ms var(--motion-ease-out), transform 200ms var(--motion-ease-out);
+}
+@starting-style {
+  .collab-panel-enter {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+/* 카드 안에서 펼쳐지는 링크 입력 폼. 짧게 — 누른 자리에서 바로 열려야 한다. */
+.collab-inline-pop {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 150ms var(--motion-ease-out), transform 150ms var(--motion-ease-out);
+}
+@starting-style {
+  .collab-inline-pop {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+/* 움직임만 걷고 불투명도는 남긴다 — 무엇이 새로 생겼는지는 여전히 읽혀야 한다. */
+@media (prefers-reduced-motion: reduce) {
+  .collab-ack-panel,
+  .collab-panel-enter,
+  .collab-inline-pop,
+  .modal-panel,
+  .reveal-step,
+  .sheet-enter {
+    transform: none;
+    transition: opacity 150ms var(--motion-ease-out);
+  }
+  @starting-style {
+    .collab-ack-panel,
+    .collab-panel-enter,
+    .collab-inline-pop,
+    .modal-panel,
+    .reveal-step,
+    .sheet-enter {
+      transform: none;
+    }
+  }
+}
+
+/* ================================================================== *
+ * Design system — "Quiet Light"
+ * A calm, near-monochrome, compact light UI. Blends the neutral
+ * marketing system (white surfaces, near-black action color, soft
+ * ring edges) with Quiet Dark's restraint (flat, hairline separation,
+ * regular weight, one accent at a time) — applied on white.
+ *
+ * Rules of the house (see CLAUDE.md, do not break):
+ *  - Edges/containers use ring-1 ring-neutral-950/5, never `border`.
+ *  - Dividers are 1px box-shadows, never `border` / `divide-*`.
+ *  - Icons are Heroicons /micro at size-4 (16px).
+ *  - Color stays neutral. Accents are semantic only and twisted off the
+ *    obvious. One accent at a time; the interface itself stays gray.
+ *
+ *  Color semantics (SSOT — every status color maps to exactly one meaning):
+ *    emerald → positive / 완료 / success  +  AI / generative
+ *              (henry 지정: violet 폐지, AI/생성 액센트를 emerald로 통합. violet/purple 신규 생성 금지.)
+ *    rose    → danger / error / 파괴적 동작
+ *    amber   → warning / 주의
+ *    sky     → in-progress / 처리 중 (subtitles·videos 파이프라인 active 상태 — done=emerald와 구분 위해).
+ *    neutral → classification labels AND terminal/closed states (종료·불발).
+ *              "Lost" is a closed state, not an error: keep it gray, not red.
+ * ================================================================== */
+@layer components {
+  /* --- Kakao delivery workspace -------------------------------- */
+
+  .kakao-delivery-divider-bottom {
+    box-shadow: var(--kakao-delivery-divider-bottom);
+  }
+  .kakao-delivery-divider-top {
+    box-shadow: var(--kakao-delivery-divider-top);
+  }
+  .kakao-delivery-panel {
+    background: white;
+    box-shadow: 0 0 0 1px var(--kakao-delivery-edge-subtle);
+  }
+  .kakao-delivery-field {
+    font-size: var(--kakao-delivery-text-field);
+    box-shadow: 0 0 0 1px var(--kakao-delivery-edge-default);
+  }
+  .kakao-delivery-field:focus {
+    box-shadow: var(--kakao-delivery-focus-ring);
+  }
+  .kakao-delivery-body-type {
+    font-size: var(--kakao-delivery-text-body);
+  }
+  .kakao-delivery-field-type {
+    font-size: var(--kakao-delivery-text-field);
+  }
+  .kakao-delivery-caption-type {
+    font-size: var(--kakao-delivery-text-caption);
+  }
+  .kakao-delivery-meta-type {
+    font-size: var(--kakao-delivery-text-meta);
+  }
+  .kakao-delivery-tab {
+    font-size: var(--kakao-delivery-text-field);
+    color: var(--color-neutral-500);
+    transition: color 150ms var(--motion-ease-out), background-color 150ms var(--motion-ease-out);
+  }
+  .kakao-delivery-tab:hover {
+    color: var(--color-neutral-800);
+    background: var(--kakao-delivery-surface-tab-hover);
+  }
+  .kakao-delivery-tab[data-state="active"] {
+    color: var(--color-neutral-900);
+    background: var(--kakao-delivery-surface-tab);
+  }
+  .kakao-delivery-rule-row:hover,
+  .kakao-delivery-history-row:hover {
+    background: var(--kakao-delivery-surface-hover);
+  }
+  .kakao-delivery-toggle {
+    position: relative;
+    width: var(--kakao-delivery-toggle-width);
+    height: var(--kakao-delivery-toggle-height);
+    flex: none;
+    border-radius: 9999px;
+    background: var(--color-neutral-300);
+    transition: background-color 150ms var(--motion-ease-out);
+  }
+  button[aria-pressed="true"] .kakao-delivery-toggle {
+    background: var(--color-emerald-600);
+  }
+  .kakao-delivery-toggle-thumb {
+    position: absolute;
+    top: var(--kakao-delivery-toggle-inset);
+    left: 0;
+    width: var(--kakao-delivery-toggle-thumb);
+    height: var(--kakao-delivery-toggle-thumb);
+    border-radius: 9999px;
+    background: white;
+    box-shadow: var(--shadow-1);
+    transform: translateX(var(--kakao-delivery-toggle-inset));
+    transition: transform 150ms var(--motion-ease-out);
+  }
+  button[aria-pressed="true"] .kakao-delivery-toggle-thumb {
+    transform: translateX(var(--kakao-delivery-toggle-travel));
+  }
+
+  /* --- Typography ------------------------------------------------- */
+
+  /* Section label: Geist Mono, uppercase, wide tracking. Reads as designed.
+     neutral-500: neutral-400은 흰 배경에서 2.5:1로 WCAG 미달이었다(11px 텍스트는 4.5:1 필요). */
+  .eyebrow {
+    @apply text-[13px] leading-[18px] text-neutral-600;
+    font-weight: 500;
+  }
+
+  /* Inline muted label for stats, fields, table headers. */
+  .label {
+    @apply text-[13px] leading-[18px] text-neutral-600;
+  }
+
+  /* Display/heading weight sits at 560 — between medium and semibold.
+     Tighten tracking on larger text. */
+  /* 제목은 본문(1.45)보다 조이는 게 맞다 (better-typography #7: headings ~1.1-1.2). */
+  .text-display {
+    font-weight: 600;
+    line-height: 1.2;
+    text-wrap: balance;
+  }
+  .text-heading {
+    font-weight: 600;
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+
+  /* Tabular figures so numbers/stats align. */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* --- Surfaces -------------------------------------------------- */
+
+  /* Standard container: white, soft ring edge + 2겹 그림자(near+ambient).
+     better-ui #3: 하드 보더 대신 투명 그림자를 겹쳐 자연스러운 깊이. */
+  .card {
+    border-radius: var(--cds-radius-card);
+    background: var(--clobe-color-base-white);
+    box-shadow: var(--cds-shadow-v2-l1);
+  }
+
+  /* Soft fill behind a figure/screenshot — makes it pop without a border. */
+  .well {
+    @apply rounded-xl bg-neutral-950/5;
+  }
+
+  /* Hairline edge for content images/thumbnails so bare images read with the
+     same depth as attachment images. One canonical image edge: pure black at
+     10% (better-ui #8 — 틴트 섞인 near-black은 이미지 가장자리에서 때처럼 보인다).
+     Ring is an outset box-shadow, so it follows the image's border-radius and
+     isn't clipped by the wrapper's overflow. */
+  .img-outline {
+    @apply ring-1 ring-[oklch(0_0_0/0.1)];
+  }
+
+  /* --- Buttons (pills, sized by padding, never a fixed height) ---- */
+
+  /* Buttons match the app's native thin style: text-xs, regular weight, pill.
+     Hierarchy comes from fill + color, not from heavier type. */
+  /* Pills carry a subtle scale(0.96) on press for tactile feedback. The
+     transition lists exact properties (never `all`) so the press scale
+     animates alongside the hover color change. disabled:active:scale-100
+     keeps disabled buttons inert. */
+  /* All pills: 라벨은 복사 대상이 아니므로 select-none (better-typography #19),
+     키보드 포커스는 focus-visible 링으로 보이게 (마우스 클릭엔 안 뜬다). */
+  /* Clobe 버튼: 높이 32px, 모서리 10px, 14px 글자. 주 버튼은 검정(gray-900),
+     보조는 흰 바탕 + 1px 선. 강조(accent)도 Clobe 규칙대로 주 버튼과 같은 검정이다. */
+  .btn-primary,
+  .btn-accent {
+    @apply inline-flex h-8 select-none items-center justify-center gap-1 rounded-[10px] px-3 text-sm whitespace-nowrap transition-[color,background-color,box-shadow,transform] duration-150 ease-[var(--motion-ease-out)] active:scale-[0.97] disabled:cursor-not-allowed disabled:active:scale-100;
+    background: var(--clobe-color-button-primary-background);
+    color: var(--clobe-color-button-primary-foreground);
+  }
+  .btn-primary:hover:not(:disabled),
+  .btn-accent:hover:not(:disabled) { background: var(--clobe-color-button-primary-background-hover); }
+  .btn-primary:disabled,
+  .btn-accent:disabled { background: var(--clobe-color-button-primary-background-disabled); }
+  .btn-secondary {
+    @apply inline-flex h-8 select-none items-center justify-center gap-1 rounded-[10px] px-3 text-sm whitespace-nowrap text-neutral-900 transition-[color,background-color,box-shadow,transform] duration-150 ease-[var(--motion-ease-out)] active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40 disabled:active:scale-100;
+    background: var(--clobe-color-button-border-background);
+    box-shadow: inset 0 0 0 1px var(--cds-line);
+  }
+  .btn-secondary:hover:not(:disabled) { background: var(--clobe-color-button-border-background-hover); }
+  .btn-ghost {
+    @apply inline-flex h-8 select-none items-center justify-center gap-1 rounded-lg px-2.5 text-sm whitespace-nowrap text-neutral-700 transition-[color,background-color,transform] duration-150 ease-[var(--motion-ease-out)] hover:bg-neutral-900/5 hover:text-neutral-900 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40 disabled:active:scale-100;
+  }
+  .btn-sm {
+    @apply h-7 gap-1 rounded-lg px-2 text-[13px];
+  }
+
+  /* --- Inputs ---------------------------------------------------- */
+
+  /* text-base sm:text-sm — iOS Safari는 16px 미만 입력에서 페이지 전체를 확대한다
+     (better-typography #15). transition도 all이 아니라 box-shadow만. */
+  .input {
+    @apply h-9 w-full rounded-[10px] bg-white px-3 text-base text-neutral-900 transition-[box-shadow] duration-150 placeholder:text-neutral-400 focus:outline-none sm:text-sm;
+    box-shadow: inset 0 0 0 1px var(--cds-line);
+  }
+  .input:focus { box-shadow: inset 0 0 0 1px var(--clobe-color-border-focus); }
+
+  /* --- Badges (subtle fill, no border, lowercase by usage) ------- */
+
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full bg-neutral-100 px-1.5 py-0.5 text-xs leading-3 font-medium text-neutral-700;
+  }
+  .badge-positive { @apply bg-green-50 text-green-700; }
+  .badge-warning  { @apply bg-orange-50 text-orange-700; }
+  .badge-danger   { @apply bg-red-50 text-red-700; }
+  /* AI / generative accent (henry 지정: violet 폐지 → emerald. badge-positive와 동일). */
+  .badge-ai       { @apply bg-emerald-500/10 text-emerald-700; }
+
+  /* --- Status dot (one consistent physical size across the app) --- */
+
+  .dot {
+    @apply inline-block size-1.5 shrink-0 rounded-full;
+  }
+  .dot-positive { @apply bg-green-600; }
+  .dot-warning  { @apply bg-amber-400; }
+  .dot-danger   { @apply bg-rose-500; }
+  .dot-ai       { @apply bg-emerald-500; }
+  .dot-muted    { @apply bg-neutral-300; }
+
+  /* --- Segmented control (pill track hugs the active pill) -------- */
+
+  .seg {
+    /* relative: LiquidPill(액체 알약)이 이 박스를 기준으로 자리를 잰다. */
+    @apply relative inline-flex items-center gap-0.5 rounded-[10px] bg-neutral-900/[0.04] p-[3px];
+  }
+  /* 버튼과 같은 press 피드백(0.96). transition은 정확한 속성만 나열. */
+  .seg-item {
+    @apply relative select-none rounded-[7px] px-1.5 py-[3px] min-w-9 text-sm text-neutral-600 transition-[color,background-color,transform] duration-150 ease-[var(--motion-ease-out)] hover:text-neutral-800 active:scale-[0.96];
+  }
+  /* 흰 알약 배경은 ActivePill(seg-pill)이 형제 사이를 미끄러지며 담당한다.
+     활성 텍스트 색만 여기 남긴다. 라벨은 .seg-label(z-10)로 알약 위에 올린다. */
+  .seg-item-active {
+    @apply text-neutral-900;
+  }
+  .seg-pill {
+    @apply rounded-[7px] bg-white;
+    box-shadow: var(--cds-shadow-v1-l1);
+  }
+  .seg-label {
+    @apply relative z-10;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-primary,
+  .btn-secondary,
+  .btn-ghost,
+  .btn-accent,
+  .seg-item {
+    transition-duration: 0.01ms;
+  }
+
+  .btn-primary:active,
+  .btn-secondary:active,
+  .btn-ghost:active,
+  .btn-accent:active,
+  .seg-item:active,
+  .todo-check:active {
+    transform: none;
+  }
+}
+
+/* 자막(/subtitles) 미리보기 cue — 검정 박스 + 흰 글씨 (burn-in ASS 스타일과 동일 톤) */
+video::cue {
+  background-color: oklch(0 0 0 / 0.85);
+  color: oklch(1 0 0);
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+/* /visualize 아티팩트 전용 폰트. 토스 다이어그램과 동일한 Pretendard Variable을
+   앱 UI(Geist+애플고딕)에 영향 없이 별도 패밀리명으로 로드한다.
+   public/fonts에 셀프호스팅해 오프라인·내보내기(html-to-image 임베드)에서 항상 동작한다. */
+@font-face {
+  font-family: "Pretendard Artifact";
+  src: url("/fonts/PretendardVariable.woff2") format("woff2-variations");
+  font-weight: 45 920;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* 인스타 카드 전용 폰트. 셀프호스팅 Pretendard로 정제된 느낌 + html-to-image
+   내보내기에서 항상 임베드된다. 카드 컴포넌트가 이 클래스를 단다. */
+.insta-font {
+  font-family: "Pretendard Artifact", "Apple SD Gothic Neo", -apple-system, sans-serif;
+  font-feature-settings: "ss01";
+}
+
+/* 인스타 세리프 커버(비범한 평범 스타일) 전용 명조. 네이버 마루부리 셀프호스팅 —
+   레퍼런스와 글리프 비율(0.158)이 일치함을 실측으로 확인. */
+@font-face {
+  font-family: "MaruBuri Artifact";
+  src: url("/fonts/MaruBuri-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "MaruBuri Artifact";
+  src: url("/fonts/MaruBuri-SemiBold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Reduced motion: gentler, not zero. Strip movement (transform-based motion
+   and long durations) but keep opacity/color so state changes stay legible.
+   Per-element opacity transitions still read; we just collapse anything that
+   slides, scales, or runs long down to a near-instant cross-fade. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  /* Drop the slide/scale offsets so reduced-motion enters with a clean fade,
+     not a teleport from an offset position. */
+  .toast-item,
+  .context-menu-pop {
+    transform: none !important;
+  }
+}
+
+.dark {
+  --surface-1: #171717;
+  --surface-2: #1E1E1E;
+  --surface-3: #252525;
+  --surface-4: #2C2C2C;
+  --surface-5: #333333;
+  --surface-6: #3A3A3A;
+  --surface-7: #414141;
+  --surface-8: #484848;
+  --dm-hi-base: rgba(255,255,255,0.01);
+  --dm-hi-mid: rgba(255,255,255,0.02);
+  --dm-hi-high: rgba(255,255,255,0.04);
+  --dm-hi-peak: rgba(255,255,255,0.06);
+  --dm-ring-base: rgba(255,255,255,0.02);
+  --dm-ring-mid: rgba(255,255,255,0.04);
+  --dm-ring-high: rgba(255,255,255,0.06);
+  --dm-drop: rgba(0,0,0,0.18);
+  --shadow-1: inset 0 0 0 1px var(--dm-ring-base);
+  --shadow-2: inset 0 1px 0 0 var(--dm-hi-base), inset 0 0 0 1px var(--dm-ring-base), 0 1px 1px -0.5px var(--dm-drop);
+  --shadow-3: inset 0 1px 0 0 var(--dm-hi-mid), inset 0 0 0 1px var(--dm-ring-base), 0 0 0 1px rgba(0,0,0,0.12), 0 1px 1px -0.5px var(--dm-drop), 0 3px 3px -1.5px var(--dm-drop);
+  --shadow-4: inset 0 1px 0 0 var(--dm-hi-mid), inset 0 0 0 1px var(--dm-ring-mid), 0 0 0 1px rgba(0,0,0,0.14), 0 1px 1px -0.5px var(--dm-drop), 0 3px 3px -1.5px var(--dm-drop), 0 6px 6px -3px var(--dm-drop);
+  --shadow-5: inset 0 1px 0 0 var(--dm-hi-high), inset 0 0 0 1px var(--dm-ring-mid), 0 0 0 1px rgba(0,0,0,0.16), 0 1px 1px -0.5px var(--dm-drop), 0 3px 3px -1.5px var(--dm-drop), 0 6px 6px -3px var(--dm-drop), 0 12px 12px -6px var(--dm-drop);
+  --shadow-6: inset 0 1px 0 0 var(--dm-hi-high), inset 0 0 0 1px var(--dm-ring-high), 0 0 0 1px rgba(0,0,0,0.18), 0 1px 1px -0.5px var(--dm-drop), 0 3px 3px -1.5px var(--dm-drop), 0 6px 6px -3px var(--dm-drop), 0 12px 12px -6px var(--dm-drop), 0 24px 24px -12px var(--dm-drop);
+  --shadow-7: inset 0 1px 0 0 var(--dm-hi-peak), inset 0 0 0 1px var(--dm-ring-high), 0 0 0 1px rgba(0,0,0,0.20), 0 1px 1px -0.5px var(--dm-drop), 0 3px 3px -1.5px var(--dm-drop), 0 6px 6px -3px var(--dm-drop), 0 12px 12px -6px var(--dm-drop), 0 24px 24px -12px var(--dm-drop), 0 48px 48px -24px var(--dm-drop);
+  --shadow-8: inset 0 1px 0 0 var(--dm-hi-peak), inset 0 0 0 1px var(--dm-ring-high), 0 0 0 1px rgba(0,0,0,0.22), 0 1px 1px -0.5px var(--dm-drop), 0 3px 3px -1.5px var(--dm-drop), 0 6px 6px -3px var(--dm-drop), 0 12px 12px -6px var(--dm-drop), 0 24px 24px -12px var(--dm-drop), 0 48px 48px -24px var(--dm-drop), 0 96px 96px -48px var(--dm-drop);
+  --hover: rgb(255 255 255 / 0.06);
+  --active: rgb(255 255 255 / 0.1);
+  --selected: #525252;
+  --destructive-light: #450A0A;
+  --overlay: 255 255 255;
+  --checker-a: #1f1f1f;
+  --checker-b: #2a2a2a;
+}
+
+.shimmer-text {
+    color: transparent;
+    background: linear-gradient(90deg, #a3a3a3 0%, #a3a3a3 35%, #525252 50%, #a3a3a3 65%, #a3a3a3 100%);
+    background-size: 300% 100%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* ══ 고민함 (concerns) ══════════════════════════════════════════════
+   ocmdeunhwan/concerns-app 에서 이식(2026-08-22). 원본은 OCMD 보라(#8982D0)
+   브랜드였고, 여기서는 henry 색으로 바꿨다: 편지·공유물 = 브랜드 그린 #00BD7D,
+   읽는 글자색 = emerald-700(#047857, 흰 바탕 AA). 규칙은 같다: border 금지,
+   ring/box-shadow, Heroicons Micro.
+   ══════════════════════════════════════════════════════════════ */
+@theme inline {
+  --color-brand: #00bd7d;
+  --color-brand-deep: #047857;
+  --color-brand-soft: #4fd9a8;
+  --color-brand-ink: #111111;
+  --color-brand-paper: #ebfdf4;
+}
+
+@layer components {
+  /* Korean serif (명조) for the 답변 노트 essay — hero title, pull-quote, body.
+     Loaded via CDN <link> in layout. Falls back to system serif gracefully. */
+  .font-myeongjo {
+    font-family: "Nanum Myeongjo", "Apple SD Gothic Neo", "Batang", serif;
+    letter-spacing: -0.01em;
+  }
+  /* Nanum Gothic — backs the Brunch font menu's 나눔고딕 / 나눔바른고딕. */
+  .font-gothic {
+    font-family: "Nanum Gothic", "Apple SD Gothic Neo", sans-serif;
+  }
+
+  /* Rendered / edited 편지 본문 (rich HTML). Used for both the read-only letter
+     (dangerouslySetInnerHTML, sanitized on save) and the contentEditable editor,
+     so what you edit matches what readers see. */
+  .letter-body {
+    word-break: keep-all;
+  }
+  .letter-body p {
+    margin: 0 0 1.35em;
+    line-height: 1.95;
+  }
+  .letter-body p:last-child {
+    margin-bottom: 0;
+  }
+  .letter-body blockquote {
+    margin: 1.4em 0;
+    padding: 0.2em 0 0.2em 1em;
+    box-shadow: inset 3px 0 0 0 var(--color-brand);
+    color: #57534e;
+    font-style: italic;
+  }
+  .letter-body ul,
+  .letter-body ol {
+    margin: 1.1em 0;
+    padding-left: 1.35em;
+  }
+  .letter-body ul {
+    list-style: disc;
+  }
+  .letter-body ol {
+    list-style: decimal;
+  }
+  .letter-body li {
+    margin: 0.35em 0;
+  }
+  .letter-body a {
+    color: var(--color-brand-deep);
+    text-decoration: underline;
+  }
+  .letter-body strong,
+  .letter-body b {
+    font-weight: 700;
+  }
+  .letter-body u {
+    text-decoration: underline;
+  }
+  .letter-body s,
+  .letter-body strike,
+  .letter-body del {
+    text-decoration: line-through;
+  }
+
+  /* Placeholder for empty contentEditable fields (Brunch-style). */
+  [contenteditable][data-placeholder]:empty::before {
+    content: attr(data-placeholder);
+    color: currentColor;
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  /* --- 지금 이거 하나만 — 화면에서 제일 검은 자리 하나 ------------- */
+  .only {
+    @apply flex items-start gap-3 rounded-2xl bg-neutral-900 px-4 py-3.5 text-white;
+  }
+  .only-k {
+    @apply text-[10.5px] uppercase tracking-[0.07em] text-white/50;
+  }
+  .only-v {
+    @apply mt-0.5 text-[15px] tracking-[-0.012em];
+  }
+  .only-n {
+    @apply mt-0.5 text-xs text-white/60;
+  }
+
+  .picklist {
+    @apply max-h-[74vh] overflow-auto rounded-2xl bg-white p-1.5 shadow-[inset_0_0_0_1px_rgba(10,10,10,0.06)];
+  }
+  .pick {
+    @apply block w-full rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-neutral-950/[0.03];
+  }
+  /* 선택 강조는 브랜드 그린, 검정 테두리를 쓰지 않는다 */
+  .pick-on {
+    @apply bg-brand/10 shadow-[inset_0_0_0_1px_rgba(0,189,125,0.35)] hover:bg-brand/10;
+  }
+  .node {
+    @apply flex size-4 items-center justify-center rounded-full bg-neutral-950/10;
+  }
+  .node-done { @apply bg-neutral-700; }
+  .node-now  { @apply bg-brand; }
+  .node-late { @apply bg-amber-600; }
+
+  .two {
+    @apply mt-3.5 grid gap-2.5 sm:grid-cols-2;
+  }
+
+  /* 아래에 붙어 따라오는 마무리 줄 */
+  .ready {
+    @apply sticky bottom-3.5 mt-3 flex items-center gap-2.5 rounded-xl bg-neutral-900 px-3.5 py-3 text-white shadow-[0_12px_32px_-14px_rgba(10,10,10,0.5)];
+  }
+
+  .field {
+    @apply w-full rounded-lg bg-neutral-950/[0.03] px-3 py-2 text-[12.5px] shadow-[inset_0_0_0_1px_rgba(10,10,10,0.06)] outline-none focus:shadow-[inset_0_0_0_1px_rgba(10,10,10,0.16)];
+  }
+}
+
+/* --- Notes rich-text content (Evernote-style editor body) --------------- */
+.note-content:empty::before {
+  content: attr(data-placeholder);
+  color: #c9c9c9;
+  pointer-events: none;
+}
+.note-content p { margin: 0.2em 0; }
+.note-content ul { list-style: disc; padding-left: 1.4em; margin: 0.3em 0; }
+.note-content ol { list-style: decimal; padding-left: 1.6em; margin: 0.3em 0; }
+.note-content li { margin: 0.15em 0; }
+.note-content a { color: #2563eb; text-decoration: underline; }
+.note-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 0.4em 0;
+}
+.note-content blockquote {
+  border-left: 3px solid rgba(10, 10, 10, 0.15);
+  padding-left: 0.8em;
+  color: #525252;
+  margin: 0.4em 0;
+}
+
+/* Checklist */
+.note-content ul.note-checklist { list-style: none; padding-left: 0; margin: 0.3em 0; }
+.note-content ul.note-checklist > li {
+  position: relative;
+  padding-left: 1.7em;
+  margin: 0.2em 0;
+}
+/* On the shared (recipient) view the whole row toggles — show it's clickable. */
+.note-content-shared ul.note-checklist > li {
+  cursor: pointer;
+  border-radius: 0.375rem;
+}
+.note-content-shared ul.note-checklist > li:hover {
+  background: rgba(10, 10, 10, 0.04);
+}
+.note-content ul.note-checklist > li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.2em;
+  width: 1.05em;
+  height: 1.05em;
+  border-radius: 0.3em;
+  border: 1.5px solid rgba(10, 10, 10, 0.28);
+  background: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85em;
+  color: #fff;
+  cursor: pointer;
+}
+.note-content ul.note-checklist > li[data-checked="true"]::before {
+  content: "✓";
+  background: #16a34a;
+  border-color: #16a34a;
+}
+.note-content ul.note-checklist > li[data-checked="true"] {
+  color: #9ca3af;
+  text-decoration: line-through;
+}
+
+/* Video timecode chip — inserted from the toolbar, edited inline. Monospace so
+   00:00 stays scannable; a click target the editor treats as one unit. */
+.note-content code.note-tc {
+  display: inline-block;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.85em;
+  line-height: 1.4;
+  padding: 0.05em 0.4em;
+  margin: 0 0.15em;
+  border-radius: 0.4em;
+  background: #eef2ff;
+  color: #4338ca;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  /* The chip holds only a timecode — keep it tight: one line, sized to its
+     content, never stretched by following text. */
+  white-space: nowrap;
+  max-width: max-content;
+}
+
+/* Attached note images — click to open the markup editor */
+.note-content img.note-img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 0.4em 0;
+  cursor: zoom-in;
+  box-shadow: 0 0 0 1px rgba(10, 10, 10, 0.06);
+  transition: box-shadow 0.12s;
+}
+.note-content img.note-img:hover {
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.5);
+}
+
+/* --- 고민함 모션 2종 (find-animation-opportunities 2026-08-22) --------- *
+ * .bar-grow: 투표·순위 결과 막대. width 는 style 로 고정해 두고 scaleX 만
+ *   0→1 로 자라게 한다(레이아웃 재계산 없음). 행마다 transition-delay 40ms.
+ * .letter-enter: 답변 편지 카드. 받는 사람이 평생 한두 번 보는 자리라
+ *   고민함에서 유일하게 300ms 를 넘겨도 되는 모션이다. */
+.bar-grow {
+  transform-origin: left;
+  transform: scaleX(1);
+  transition: transform 300ms var(--motion-ease-out);
+}
+@starting-style {
+  .bar-grow { transform: scaleX(0); }
+}
+.letter-enter {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 320ms var(--motion-ease-out), transform 320ms var(--motion-ease-out);
+}
+@starting-style {
+  .letter-enter { opacity: 0; transform: translateY(10px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bar-grow { transition: none; }
+  .letter-enter { transition: opacity 150ms ease; }
+  @starting-style { .letter-enter { transform: none; } }
+}
+
+@layer base {
+  :focus-visible {
+    outline: 1px solid var(--focus-ring, #6B97FF);
+    outline-offset: 2px;
+    border-radius: var(--shape-input-radius, 8px);
+  }
+  a:focus-visible {
+    border-radius: 2px;
+  }
+}
+html.transitioning *, html.transitioning *::before, html.transitioning *::after {
+    transition: border-radius 180ms ease-in-out, background-color 180ms ease-in-out, color 180ms ease-in-out, border-color 180ms ease-in-out, fill 180ms ease-in-out, stroke 180ms ease-in-out !important;
+}
+@property --sf-start {
+    syntax: "<number>";
+    inherits: false;
+    initial-value: 1;
+}
+@property --sf-end {
+    syntax: "<number>";
+    inherits: false;
+    initial-value: 1;
+}
+.scroll-fade, .scroll-fade-x {
+    --scroll-fade-size: 48px;
+}
+.scroll-fade {
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 var(--scroll-fade-size), #000 calc(100% - var(--scroll-fade-size)), transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0, #000 var(--scroll-fade-size), #000 calc(100% - var(--scroll-fade-size)), transparent 100%);
+}
+.scroll-fade-x {
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--scroll-fade-size), #000 calc(100% - var(--scroll-fade-size)), transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0, #000 var(--scroll-fade-size), #000 calc(100% - var(--scroll-fade-size)), transparent 100%);
+}
+
+@supports (timeline-scope: --sf) {
+  .scroll-divider {
+    position: relative;
+    timeline-scope: --sf-scroller;
+    --scroll-divider-size: 48px;
+  }
+  .scroll-divider .scroll-fade {
+    scroll-timeline-name: --sf-scroller;
+  }
+  .scroll-divider::before, .scroll-divider::after {
+    content: "";
+    position: absolute;
+    left: var(--scroll-divider-inset, 0px);
+    right: var(--scroll-divider-inset, 0px);
+    height: 1px;
+    background-color: var(--border);
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0;
+  }
+  .scroll-divider::before {
+    top: 0;
+    animation: sf-divider-start both linear;
+    animation-timeline: --sf-scroller;
+    animation-range: 0 var(--scroll-divider-size);
+  }
+  .scroll-divider:first-child::before {
+    content: none;
+  }
+  .scroll-divider::after {
+    bottom: 0;
+    animation: sf-divider-end both linear;
+    animation-timeline: --sf-scroller;
+    animation-range: calc(100% - var(--scroll-divider-size)) 100%;
+  }
+}
+
+@supports (animation-timeline: scroll()) {
+  .scroll-fade {
+    mask-image: linear-gradient(to bottom, rgba(0, 0, 0, var(--sf-start)) 0, #000 var(--scroll-fade-size), #000 calc(100% - var(--scroll-fade-size)), rgba(0, 0, 0, var(--sf-end)) 100%);
+    -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, var(--sf-start)) 0, #000 var(--scroll-fade-size), #000 calc(100% - var(--scroll-fade-size)), rgba(0, 0, 0, var(--sf-end)) 100%);
+    animation: sf-reveal-start both linear, sf-reveal-end both linear;
+    animation-timeline: scroll(self), scroll(self);
+    animation-range-start: 0, calc(100% - var(--scroll-fade-size));
+    animation-range-end: var(--scroll-fade-size), 100%;
+  }
+  .scroll-fade-x {
+    mask-image: linear-gradient(to right, rgba(0, 0, 0, var(--sf-start)) 0, #000 var(--scroll-fade-size), #000 calc(100% - var(--scroll-fade-size)), rgba(0, 0, 0, var(--sf-end)) 100%);
+    -webkit-mask-image: linear-gradient(to right, rgba(0, 0, 0, var(--sf-start)) 0, #000 var(--scroll-fade-size), #000 calc(100% - var(--scroll-fade-size)), rgba(0, 0, 0, var(--sf-end)) 100%);
+    animation: sf-reveal-start both linear, sf-reveal-end both linear;
+    animation-timeline: scroll(self inline), scroll(self inline);
+    animation-range-start: 0, calc(100% - var(--scroll-fade-size));
+    animation-range-end: var(--scroll-fade-size), 100%;
+  }
+}
+
+@media (pointer: fine) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--overlay) / 0.08) transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track, ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: rgb(var(--overlay) / 0.08);
+    border: 3px solid transparent;
+    background-clip: content-box;
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:vertical {
+    border-left-width: 1px;
+    border-right-width: 5px;
+  }
+  ::-webkit-scrollbar-thumb:horizontal {
+    border-top-width: 1px;
+    border-bottom-width: 5px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(var(--overlay) / 0.12);
+  }
+  ::-webkit-scrollbar-thumb:active {
+    background-color: rgb(var(--overlay) / 0.16);
+  }
+}
+
+@property --sf-start {
+    syntax: "<number>";
+    inherits: false;
+    initial-value: 1;
+}
+
+@property --sf-end {
+    syntax: "<number>";
+    inherits: false;
+    initial-value: 1;
+}
+
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}

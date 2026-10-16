@@ -1,0 +1,35 @@
+/* Values Clobe hard-codes per component (no CSS variable exists). Measured with getComputedStyle at 1440x900. */
+:root {
+  --cds-radius-segment-item: 7px;
+  --cds-radius-sm: 8px;
+  --cds-radius-md: 10px;
+  --cds-radius-lg: 12px;
+  --cds-radius-card: 16px;
+  --cds-radius-pill: 100px;
+
+  --cds-space-2: 2px;
+  --cds-space-3: 3px;
+  --cds-space-4: 4px;
+  --cds-space-6: 6px;
+  --cds-space-8: 8px;
+  --cds-space-10: 10px;
+  --cds-space-12: 12px;
+  --cds-space-16: 16px;
+  --cds-space-20: 20px;
+  --cds-space-24: 24px;
+  --cds-space-40: 40px;
+
+  --cds-sidebar-width: 240px;
+  --cds-control-height: 32px;
+  --cds-line: var(--clobe-color-gray-opacity-12);
+  --cds-line-subtle: var(--clobe-color-gray-opacity-07);
+  --cds-shadow-floating-card: 0 8px 16px 0 var(--clobe-color-gray-opacity-02);
+  --cds-tracking: -0.02em;
+
+  /* Clobe app-shell theme colors (read from :root at runtime; icons reference them). */
+  --clobe-theme-app-shell-gnb-foreground-strong: #1D2225;
+  --clobe-theme-app-shell-gnb-workspace-foreground: #1D2225;
+  --clobe-theme-app-shell-gnb-foreground-subtle: #686B6D;
+  --clobe-theme-app-shell-gnb-footer-banner-foreground: #1D2225;
+  --clobe-theme-app-shell-brand-primary: #5B24D6;
+}

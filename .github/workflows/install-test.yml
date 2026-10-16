@@ -1,0 +1,49 @@
+# 새 컴퓨터에서 설치 시험. 맥은 Homebrew 를 PATH 에서 빼고 돌린다.
+name: install-test
+on:
+  push:
+  workflow_dispatch:
+jobs:
+  mac:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, macos-15-intel]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: 받은 ZIP 처럼 복사 (인터넷에서 받음 표시 포함)
+        run: |
+          mkdir -p "$HOME/Downloads"
+          rsync -a --exclude .git ./ "$HOME/Downloads/seoa-studio-main/"
+          xattr -w com.apple.quarantine "0081;00000000;Safari;" "$HOME/Downloads/seoa-studio-main/bin/meeting-capture"
+      - name: 설치 (Homebrew 없는 PATH)
+        run: env -i HOME="$HOME" PATH="/usr/bin:/bin:/usr/sbin:/sbin" bash "$HOME/Downloads/seoa-studio-main/install.sh"
+      - name: 두 번째 설치 (같은 결과인지)
+        run: env -i HOME="$HOME" PATH="/usr/bin:/bin:/usr/sbin:/sbin" bash "$HOME/Downloads/seoa-studio-main/install.sh"
+      - name: 앱이 켜지고 화면이 나오는지
+        run: |
+          cd "$HOME/SimplyhomeStudio"
+          PATH="$HOME/.seoa-studio/node/bin:$PATH" npx next start -H 127.0.0.1 -p 3100 &
+          for i in $(seq 1 30); do curl -sf 127.0.0.1:3100/api/settings >/dev/null && break; sleep 2; done
+          curl -sf 127.0.0.1:3100/settings | grep -q "설정"
+          curl -sf 127.0.0.1:3100/meetings >/dev/null
+          test "$(curl -s -o /dev/null -w '%{http_code}' 127.0.0.1:3100/api/instagram/comments)" = "409"
+      - name: 녹음 도구 실행
+        run: |
+          xattr -p com.apple.quarantine "$HOME/SimplyhomeStudio/bin/meeting-capture" && exit 1 || true
+          "$HOME/SimplyhomeStudio/bin/meeting-capture" --doctor | grep -q "native-capture=available"
+      - name: 제거 후 흔적 없음
+        run: |
+          bash "$HOME/SimplyhomeStudio/uninstall.sh"
+          test ! -e "$HOME/SimplyhomeStudio" && test ! -e "$HOME/.seoa-studio"
+          test ! -e "$HOME/Desktop/심플리홈 스튜디오.command"
+  linux-stops:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: 맥이 아니면 아무것도 바꾸지 않고 멈추는지
+        run: |
+          out="$(bash install.sh)"
+          echo "$out" | grep -q "맥 전용"
+          test ! -e "$HOME/SimplyhomeStudio" && test ! -e "$HOME/.seoa-studio"
