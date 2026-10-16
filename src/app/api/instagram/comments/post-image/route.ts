@@ -20,7 +20,7 @@ function imageResponse(bytes: Buffer, cache: "HIT" | "MISS") {
 
 export async function GET(request: NextRequest) {
   const mediaId = request.nextUrl.searchParams.get("mediaId");
-  if (!mediaId) {
+  if (!mediaId || !/^\d+$/.test(mediaId)) {
     return NextResponse.json({ error: "mediaId가 필요합니다" }, { status: 400 });
   }
   try {
