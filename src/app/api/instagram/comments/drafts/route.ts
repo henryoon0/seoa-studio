@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { runDraftJob, startDraftJob } from "@/lib/instagram-comments/draft-job";
+import { mediaScope, runDraftJob, scopeTargets, startDraftJob } from "@/lib/instagram-comments/draft-job";
 import { scanQuestions } from "@/lib/instagram-comments/drafts";
-import { own, pendingComments } from "@/lib/instagram-comments/model";
+import { own } from "@/lib/instagram-comments/model";
 import { readDraftJob, readFacts, readLedger, updateFacts } from "@/lib/instagram-comments/storage";
 
 // 초안 일괄 생성 (#66). POST 흐름:
@@ -18,6 +18,8 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const body = (await request.json()) as {
     scope?: string; // "all" | mediaId
+    /** 고른 최신 게시물들 (최대 3개). 있으면 scope 보다 먼저다. */
+    mediaIds?: string[];
     skipQuestions?: boolean;
     answers?: { question?: string; answer?: string }[];
     action?: string;
@@ -28,7 +30,12 @@ export async function POST(request: NextRequest) {
     if (job && job.status === "running") void runDraftJob(job.id); // 멱등 — 고아면 재개
     return NextResponse.json({ job });
   }
-  const scope = body.scope?.trim() || "all";
+  let scope = body.scope?.trim() || "all";
+  if (Array.isArray(body.mediaIds)) {
+    const picked = mediaScope(await readLedger(), body.mediaIds.filter((id): id is string => typeof id === "string"));
+    if (!picked) return NextResponse.json({ error: "최신 게시물 3개 중에서 골라 주세요." }, { status: 400 });
+    scope = picked;
+  }
 
   const existing = await readDraftJob();
   if (existing && existing.status === "running") {
@@ -57,7 +64,7 @@ export async function POST(request: NextRequest) {
   // 선질문 스캔 — 답변을 이미 받았거나 건너뛰면 생략
   if (!body.skipQuestions && answers.length === 0) {
     const ledger = await readLedger();
-    const targets = pendingComments(ledger).filter((c) => scope === "all" || c.mediaId === scope);
+    const targets = scopeTargets(ledger, scope);
     if (targets.length === 0) {
       return NextResponse.json({ error: "초안을 만들 남은 답글이 없어요." }, { status: 400 });
     }
@@ -68,7 +75,7 @@ export async function POST(request: NextRequest) {
         mediaCaptions: [...new Set(targets.map((c) => own(ledger.media, c.mediaId)?.captionFirstLine ?? ""))].filter(Boolean),
         facts,
       });
-      if (questions.length > 0) return NextResponse.json({ questions });
+      if (questions.length > 0) return NextResponse.json({ questions, scope });
     } catch {
       // 질문 스캔 실패는 치명적이지 않다 — 바로 생성으로 넘어간다.
     }

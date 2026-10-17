@@ -5,7 +5,7 @@ import { Icon } from "@/components/icon";
 // 왼쪽 = 인스타 '활동' 알림처럼 "○○님이 댓글을 남겼어요" 줄(게시물 썸네일 포함),
 // 오른쪽 = 게시물 보기(사진 + 댓글 + 입력칸). 입력칸엔 AI 초안이 이미 들어 있다.
 // ⏎ = 초안 저장 → 서버 발송 대기줄(15~30초 무작위 간격, 기존 #81) → 즉시 다음 댓글. Esc = 건너뛰기.
-// 초안 후보 3개(짧게·따뜻하게·안내 포함)는 서버가 미리 만들어 둔다 — Tab 으로 바꾼다.
+// 초안 후보 3개(짧게·따뜻하게·안내 포함)는 [초안 만들기]로 고른 최신 게시물의 댓글에만 생긴다 — Tab 으로 바꾼다.
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
@@ -275,10 +275,12 @@ function PostView({
 }
 
 export function CommentsInsta({
-  list: live, media, discovery, syncing, onSync, onSkip, onChanged,
+  list: live, media, discovery, syncing, onSync, onSkip, onChanged, draftProgress, onOpenDrafts,
 }: {
   list: Comment[]; media: Record<string, MediaInfo>; discovery: Record<string, DiscoveryEntry>;
   syncing: boolean; onSync: () => void; onSkip: (id: string) => void; onChanged?: () => void;
+  /** 초안 잡이 도는 중이면 "3/10", 아니면 null */
+  draftProgress: string | null; onOpenDrafts: () => void;
 }) {
   // 서버 갱신(새 초안·새로 동기화한 댓글)은 댓글 id 로 합친다. 보낸 댓글이 재조회로 사라져도 줄이 흔들리지 않게 예전 항목은 남긴다.
   const [snapshot, setSnapshot] = useState(live);
@@ -457,6 +459,11 @@ export function CommentsInsta({
             <span className="text-[16px] font-bold text-neutral-950">댓글</span>
             <span className="ml-1.5 text-[13px] font-semibold text-neutral-500"><NumberFlow value={left} /></span>
             <span className="ml-auto" />
+            <button type="button" onClick={onOpenDrafts} disabled={!!draftProgress}
+              className="mr-1 inline-flex h-8 items-center gap-1 rounded-full px-3 text-[13px] font-semibold transition-colors hover:bg-neutral-950/[0.05] disabled:text-neutral-500" style={draftProgress ? undefined : { color: IG_BLUE }}>
+              <Icon name="sparkles" className={`size-3.5 ${draftProgress ? "animate-pulse" : ""}`} />
+              {draftProgress ? `초안 ${draftProgress}` : "초안 만들기"}
+            </button>
             <button type="button" title="새로고침" onClick={onSync} disabled={syncing} className={ICON_BTN}><Icon name="refresh" className={`size-4 ${syncing ? "animate-spin" : ""}`} /></button>
             <SortMenu value={sort} onChange={setSort} />
           </div>

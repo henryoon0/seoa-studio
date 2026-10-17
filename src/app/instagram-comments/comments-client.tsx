@@ -17,6 +17,7 @@ import { CommentReplyCard } from "./comment-reply-card";
 import { IntentList, orderByIntent } from "./comment-rows";
 import { CommentSendBar } from "./comment-send-bar";
 import { CommentStack } from "./comment-stack";
+import { DraftPostsModal } from "./draft-posts";
 import {
   postImageUrl,
   type Comment,
@@ -59,6 +60,7 @@ export function CommentsClient({
   const [queue, setQueue] = useState<QueueView | null>(null);
   // 작성자 계정 조회 (#64) — username → 결과 (프로 계정만 사진·게시물)
   const [discovery, setDiscovery] = useState<Record<string, DiscoveryEntry>>({});
+  const [pickingDrafts, setPickingDrafts] = useState(false);
   const draftTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const setMode = (m: Mode) => {
@@ -389,7 +391,12 @@ export function CommentsClient({
 
       {data && view === "pending" && mode === "insta" ? (
         <CommentsInsta list={ordered} media={data.media} discovery={discovery} syncing={busy === "sync"} onSync={() => void syncNow()}
-          onSkip={(id) => void setSkip(id, true)} onChanged={onChanged} />
+          onSkip={(id) => void setSkip(id, true)} onChanged={onChanged}
+          draftProgress={draftJob?.status === "running" ? `${draftJob.done.length + draftJob.failed.length}/${draftJob.commentIds.length}` : null}
+          onOpenDrafts={() => setPickingDrafts(true)} />
+      ) : null}
+      {data && pickingDrafts ? (
+        <DraftPostsModal media={data.media} pending={data.pending} onClose={() => setPickingDrafts(false)} onStarted={setDraftJob} />
       ) : null}
 
       {data && view === "pending" && mode === "stack" ? (

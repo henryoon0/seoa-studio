@@ -4,7 +4,7 @@
 //   ③ 외부 호출 타임아웃: generateText(reasoning) 는 claude-cli 자체 하드 타임아웃을 가진다.
 import { randomUUID } from "crypto";
 import { generateReplyOptions } from "./drafts";
-import { missingDraftOptions, own, pendingComments, setDraftOptions } from "./model";
+import { missingDraftOptions, own, pendingComments, setDraftOptions, type IgCommentLedger, type IgLedgerComment, type IgMedia } from "./model";
 import {
   readDraftJob,
   readFacts,
@@ -21,6 +21,30 @@ function runningSet(): Set<string> {
   return g.__igDraftJobs;
 }
 
+/** 초안을 고를 수 있는 게시물 수. 최신 게시물만 고르게 한다(2026-10-17 henry). */
+export const PICKABLE_POSTS = 3;
+
+/** 초안 대상으로 고를 수 있는 최신 게시물 (올린 시각 최신순) */
+export function latestMedia(ledger: IgCommentLedger, limit = PICKABLE_POSTS): IgMedia[] {
+  return Object.values(ledger.media)
+    .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
+    .slice(0, limit);
+}
+
+/** scope "media:<id>,<id>" = 고른 게시물들. 최신 게시물 밖의 id 는 버린다. */
+export function mediaScope(ledger: IgCommentLedger, mediaIds: string[]): string | null {
+  const allowed = new Set(latestMedia(ledger).map((m) => m.id));
+  const ids = [...new Set(mediaIds)].filter((id) => allowed.has(id));
+  return ids.length ? `media:${ids.join(",")}` : null;
+}
+
+/** scope 에 맞는 남은 댓글. "all" · "missing" · "media:<id>,<id>" · 게시물 id 하나. */
+export function scopeTargets(ledger: IgCommentLedger, scope: string): IgLedgerComment[] {
+  if (scope === "missing") return missingDraftOptions(ledger);
+  const ids = scope.startsWith("media:") ? new Set(scope.slice(6).split(",")) : null;
+  return pendingComments(ledger).filter((c) => scope === "all" || (ids ? ids.has(c.mediaId) : c.mediaId === scope));
+}
+
 /**
  * 잡 시작: scope="all" 이면 미답글 전부, "missing" 이면 후보 3개가 없는 미답글만,
  * 아니면 그 게시물(mediaId)의 미답글만.
@@ -31,10 +55,7 @@ export async function startDraftJob(scope: string): Promise<DraftJob> {
   if (existing && existing.status === "running") return existing;
 
   const ledger = await readLedger();
-  const targets =
-    scope === "missing"
-      ? missingDraftOptions(ledger)
-      : pendingComments(ledger).filter((c) => scope === "all" || c.mediaId === scope);
+  const targets = scopeTargets(ledger, scope);
   const now = new Date().toISOString();
   const job: DraftJob = {
     id: randomUUID(),
@@ -104,17 +125,4 @@ export async function runDraftJob(jobId: string): Promise<void> {
   } finally {
     running.delete(jobId);
   }
-}
-
-/**
- * 화면을 열 때 부른다: 후보 3개가 없는 남은 답글이 있으면 잡을 자동으로 시작한다.
- * 도는 잡이 있으면 아무것도 안 한다. 한 번 실패한 댓글은 같은 잡 안에서 다시 돌지 않는다
- * (다음 자동 시작은 새 잡이라 다시 시도된다).
- */
-export async function ensureDraftOptions(): Promise<void> {
-  const existing = await readDraftJob();
-  if (existing?.status === "running") return;
-  const ledger = await readLedger();
-  if (missingDraftOptions(ledger).length === 0) return;
-  await startDraftJob("missing");
 }

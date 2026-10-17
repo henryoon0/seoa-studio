@@ -30,7 +30,7 @@ export function aiConfigError(message: string): Error {
   return err;
 }
 
-function isAiConfigError(e: unknown): e is Error {
+export function isAiConfigError(e: unknown): e is Error {
   return Boolean(
     e &&
       typeof e === "object" &&
