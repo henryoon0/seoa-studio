@@ -153,6 +153,8 @@ ${voiceExamplesBlock(inboundBurst(c).join(" "))}
 
 ${dmStyleRules(measureDmStyle(ledger))}
 
+다른 사람과 나눈 대화의 내용(이름·주문·개인 사정)은 이 사람에게 쓰지 않는다. 예전 답장은 말투만 참고한다.
+
 출력 형식 — 같은 답을 두 버전으로 쓴다
 - short: 말풍선 1개로 짧게
 - split: 말풍선 2개로 나눠서. 첫 말풍선은 반응, 둘째는 이어지는 말
