@@ -147,6 +147,17 @@
    화면마다 클래스를 고치지 않고 한 곳에서 전체 앱의 색을 바꾸는 다리다.
    강조(emerald)는 Clobe 정보 파랑, 경고(amber)는 주황, 위험(rose)은 빨강으로 간다. */
 @theme {
+  /* 주 색(잉크 네이비). Figma 의 primary/50-900 과 같은 값. 파랑·에메랄드 계열 유틸은 모두 이 색을 쓴다. */
+  --color-primary-50: var(--clobe-color-blue-50);
+  --color-primary-100: var(--clobe-color-blue-100);
+  --color-primary-200: var(--clobe-color-blue-200);
+  --color-primary-300: var(--clobe-color-blue-300);
+  --color-primary-400: var(--clobe-color-blue-400);
+  --color-primary-500: var(--clobe-color-blue-500);
+  --color-primary-600: var(--clobe-color-blue-600);
+  --color-primary-700: var(--clobe-color-blue-700);
+  --color-primary-800: var(--clobe-color-blue-800);
+  --color-primary-900: var(--clobe-color-blue-900);
   --color-neutral-50: var(--clobe-color-gray-50);
   --color-neutral-100: var(--clobe-color-gray-100);
   --color-neutral-200: var(--clobe-color-gray-200);

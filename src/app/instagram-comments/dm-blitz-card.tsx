@@ -3,7 +3,7 @@
 // DM 쳐내기 대화 칸 — "인스타 그대로 + 초안", 오른쪽 패널 없음.
 // 인스타 웹 Direct 생김새(회색/파랑 말풍선 · 둥근 입력칸 · "보내기")에 초안과 'AI 초안' 줄만 얹는다.
 // 키: ⏎ 보내고 다음 · ⇧⏎ 말풍선 나누기 · Esc 넘기기. 발송은 서버 대기줄이 간격을 지켜 알아서 내보낸다.
-// ⚠ 말풍선 파랑(#3797F0)은 인스타 원래 색이다 (실제 DM 과 비슷하게). 앱 액션 색과 다르다.
+// 말풍선·버튼 색은 앱 주 색(--color-primary-700, 잉크 네이비)을 쓴다. Figma primary/700 과 같다.
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
@@ -60,7 +60,7 @@ export function relativeTime(iso: string): string {
   return `${Math.floor(hr / 24)}일 전`;
 }
 
-export const IG_BLUE = "#3797F0";
+export const IG_BLUE = "var(--color-primary-700)";
 /** 보낸 말풍선과 "보냄"을 보여 주는 시간. 그 뒤 다음 대화로 넘어간다. */
 const SENT_PAUSE_MS = 600;
 

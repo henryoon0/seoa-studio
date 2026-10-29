@@ -15,7 +15,7 @@ import { relativeTime } from "./dm-shared";
 import { errorOf, recoverLostEnqueue, UNKNOWN_HINT, type ServerItem } from "./queue-recovery";
 import { Avatar, postImageUrl, TONE_LABEL, type Comment, type DiscoveryEntry, type MediaInfo } from "./comments-shared";
 
-const IG_BLUE = "#3797F0";
+const IG_BLUE = "var(--color-primary-700)";
 const SENT_PAUSE_MS = 600;
 const QUEUE_POLL_MS = 3000;
 // 발송 대기줄 상태 (서버가 새 상태를 더해도 모르는 값은 "대기"로 본다). skipped 는 이 화면에서만 쓰는 값.

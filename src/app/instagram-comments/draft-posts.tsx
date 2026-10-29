@@ -10,7 +10,7 @@ import { Icon } from "@/components/icon";
 import { springs } from "@/components/motion/presets";
 import { postImageUrl, type Comment, type DraftJob, type MediaInfo } from "./comments-shared";
 
-const IG_BLUE = "#3797F0";
+const IG_BLUE = "var(--color-primary-700)";
 const PICKABLE_POSTS = 3;
 
 type Step = { kind: "pick" } | { kind: "asking" } | { kind: "questions"; questions: string[] } | { kind: "starting" };
