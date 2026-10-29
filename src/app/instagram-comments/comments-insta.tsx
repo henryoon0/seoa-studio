@@ -15,7 +15,7 @@ import { relativeTime } from "./dm-shared";
 import { errorOf, recoverLostEnqueue, UNKNOWN_HINT, type ServerItem } from "./queue-recovery";
 import { Avatar, postImageUrl, TONE_LABEL, type Comment, type DiscoveryEntry, type MediaInfo } from "./comments-shared";
 
-const IG_BLUE = "var(--color-primary-700)";
+import { ACCENT } from "./dm-blitz-card";
 const SENT_PAUSE_MS = 600;
 const QUEUE_POLL_MS = 3000;
 // 발송 대기줄 상태 (서버가 새 상태를 더해도 모르는 값은 "대기"로 본다). skipped 는 이 화면에서만 쓰는 값.
@@ -252,7 +252,7 @@ function PostView({
               placeholder={opts.length ? "댓글 달기..." : "초안 쓰는 중..."}
               className="min-w-0 flex-1 resize-none bg-transparent text-[14px] leading-[1.45] text-neutral-950 outline-none placeholder:text-neutral-500" />
             {text.trim() && !sent ? (
-              <button type="button" onClick={onSend} className="shrink-0 text-[14px] font-semibold transition-opacity hover:opacity-70 active:scale-[0.96]" style={{ color: IG_BLUE }}>게시</button>
+              <button type="button" onClick={onSend} className="shrink-0 text-[14px] font-semibold transition-opacity hover:opacity-70 active:scale-[0.96]" style={{ color: ACCENT }}>게시</button>
             ) : null}
           </div>
           {error && !sent ? <p role="alert" className="mt-2 rounded-lg bg-rose-50 px-3 py-2 text-[12px] text-rose-700">{error}</p> : null}
@@ -460,7 +460,7 @@ export function CommentsInsta({
             <span className="ml-1.5 text-[13px] font-semibold text-neutral-500"><NumberFlow value={left} /></span>
             <span className="ml-auto" />
             <button type="button" onClick={onOpenDrafts} disabled={!!draftProgress}
-              className="mr-1 inline-flex h-8 items-center gap-1 rounded-full px-3 text-[13px] font-semibold transition-colors hover:bg-neutral-950/[0.05] disabled:text-neutral-500" style={draftProgress ? undefined : { color: IG_BLUE }}>
+              className="mr-1 inline-flex h-8 items-center gap-1 rounded-full px-3 text-[13px] font-semibold transition-colors hover:bg-neutral-950/[0.05] disabled:text-neutral-500" style={draftProgress ? undefined : { color: ACCENT }}>
               <Icon name="sparkles" className={`size-3.5 ${draftProgress ? "animate-pulse" : ""}`} />
               {draftProgress ? `초안 ${draftProgress}` : "초안 만들기"}
             </button>

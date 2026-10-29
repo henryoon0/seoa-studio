@@ -60,7 +60,7 @@ export function relativeTime(iso: string): string {
   return `${Math.floor(hr / 24)}일 전`;
 }
 
-export const IG_BLUE = "var(--color-primary-700)";
+export const ACCENT = "var(--color-primary-700)";
 /** 보낸 말풍선과 "보냄"을 보여 주는 시간. 그 뒤 다음 대화로 넘어간다. */
 const SENT_PAUSE_MS = 600;
 
@@ -177,7 +177,7 @@ function Thread({ convo, sent }: { convo: Conversation; sent: string[] | null })
     <div className="flex min-h-0 flex-1 flex-col justify-end gap-[2px] overflow-y-auto px-4 py-3">
       {mine ? (
         <div className="mb-3 flex justify-end pl-16">
-          <p className="whitespace-pre-wrap rounded-[22px] px-3 py-2 text-[15px] leading-snug text-white" style={{ background: IG_BLUE }}>{mine}</p>
+          <p className="whitespace-pre-wrap rounded-[22px] px-3 py-2 text-[15px] leading-snug text-white" style={{ background: ACCENT }}>{mine}</p>
         </div>
       ) : null}
       {burst[0] ? <p className="mb-2 text-center text-[12px] text-neutral-500">{stamp(burst[0].createdTime)}</p> : null}
@@ -190,7 +190,7 @@ function Thread({ convo, sent }: { convo: Conversation; sent: string[] | null })
       {sent?.map((m, k) => (
         <motion.div key={k} className={`flex justify-end pl-16 ${k === 0 ? "mt-3" : ""}`}
           initial={reduce ? false : { opacity: 0, y: 14, scale: 0.94 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ ...springs.snappy, delay: k * 0.06 }}>
-          <p className={`px-3 py-2 text-[15px] leading-snug text-white ${corner("out", k, sent.length)}`} style={{ background: IG_BLUE }}>{m}</p>
+          <p className={`px-3 py-2 text-[15px] leading-snug text-white ${corner("out", k, sent.length)}`} style={{ background: ACCENT }}>{m}</p>
         </motion.div>
       ))}
       {sent ? <motion.p className="mt-1 text-right text-[11px] text-neutral-400" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25 }}>보냄</motion.p> : null}
@@ -227,7 +227,7 @@ function VersionTabs({ version, onToggle }: { version: number | null; onToggle: 
 function SendButton({ appOnly, disabled, onClick }: { appOnly: boolean; disabled: boolean; onClick: () => void }) {
   return (
     <button type="button" onClick={onClick} disabled={disabled}
-      className="mb-0.5 inline-flex shrink-0 items-center gap-1 text-[15px] font-semibold transition-opacity hover:opacity-70 active:scale-[0.96] disabled:opacity-40" style={{ color: IG_BLUE }}>
+      className="mb-0.5 inline-flex shrink-0 items-center gap-1 text-[15px] font-semibold transition-opacity hover:opacity-70 active:scale-[0.96] disabled:opacity-40" style={{ color: ACCENT }}>
       {appOnly ? <>복사 · 앱 <Icon name="external" className="size-4" /></> : "보내기"}
     </button>
   );
@@ -373,7 +373,7 @@ export function QuestionsModal({
         </div>
         <div className="flex shrink-0 items-center justify-end gap-4 px-5 py-4 shadow-[0_-1px_0_0_rgba(10,10,10,0.08)]">
           <button type="button" onClick={onSkip} className="text-[14px] font-medium text-neutral-500 hover:text-neutral-800">건너뛰고 만들기</button>
-          <button type="submit" disabled={!ready} className="rounded-[10px] px-4 py-2 text-[14px] font-semibold text-white disabled:opacity-40" style={{ background: IG_BLUE }}>
+          <button type="submit" disabled={!ready} className="rounded-[10px] px-4 py-2 text-[14px] font-semibold text-white disabled:opacity-40" style={{ background: ACCENT }}>
             전체 초안 만들기 <span className="ml-1 text-[12px] font-normal opacity-80">⌘⏎</span>
           </button>
         </div>
