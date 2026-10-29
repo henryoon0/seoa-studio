@@ -31,5 +31,5 @@
   --clobe-theme-app-shell-gnb-workspace-foreground: #1D2225;
   --clobe-theme-app-shell-gnb-foreground-subtle: #686B6D;
   --clobe-theme-app-shell-gnb-footer-banner-foreground: #1D2225;
-  --clobe-theme-app-shell-brand-primary: #5B24D6;
+  --clobe-theme-app-shell-brand-primary: var(--clobe-color-blue-700);
 }

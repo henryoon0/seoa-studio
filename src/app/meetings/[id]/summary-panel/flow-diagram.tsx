@@ -17,8 +17,8 @@ const RULE_CHARS = 14;
 const INK = "#0a0a0a";
 const MUTED = "#525252";
 const RULE = "rgba(10,10,10,0.10)";
-const ACCENT = "#00BD7D";
-const ACCENT_TINT = "#EBFDF4";
+const ACCENT = "#53668C"; // primary/500. SVG 속성은 CSS 변수를 못 읽어 값을 쓴다.
+const ACCENT_TINT = "#F4F6FA"; // primary/50
 const UNASSIGNED = "담당 미정";
 
 export interface DiagramStage {

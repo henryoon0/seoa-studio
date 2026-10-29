@@ -13,7 +13,7 @@ import { Icon } from "@/components/icon";
 import { motion } from "motion/react";
 import { springs } from "@/components/motion/presets";
 import type { DmStyle } from "@/lib/instagram-dm/dm-style";
-import { Avatar, ChatCard, IG_BLUE, QuestionsModal, relativeTime, splitThread, type BlitzBasis, type BlitzQuestion, type Conversation } from "./dm-blitz-card";
+import { Avatar, ChatCard, ACCENT, QuestionsModal, relativeTime, splitThread, type BlitzBasis, type BlitzQuestion, type Conversation } from "./dm-blitz-card";
 
 type Handled = "sent" | "copied" | "skipped";
 type QueueView = { status: string; stopReason: string | null; conversations: Record<string, { status: "pending" | "sent" | "failed"; error?: string }>; style?: DmStyle };
@@ -163,7 +163,7 @@ function RowMark({ handled, queued, asked, reason }: { handled?: Handled; queued
   if (queued?.status === "failed") return <span title={queued.error} className="text-[11px] font-semibold text-rose-600">!</span>;
   if (handled === "sent" || handled === "copied") return <span className="text-[11px] text-neutral-400">{handled === "sent" ? "보냄" : "복사함"}</span>;
   if (asked) return <span className="text-[12px] font-semibold text-amber-600">?</span>;
-  return <span className="size-2 shrink-0 rounded-full" style={{ background: IG_BLUE }} />;
+  return <span className="size-2 shrink-0 rounded-full" style={{ background: ACCENT }} />;
 }
 
 function StoppedBar({ queue, onResume }: { queue: QueueView | null; onResume: () => void }) {
@@ -288,7 +288,7 @@ function DoneList({ list, row, onClear }: { list: Conversation[]; row: (c: Conve
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex shrink-0 items-center justify-between px-4 py-2 text-[12px] text-neutral-500">
         <span>마무리 인사·스토리 언급·이모지</span>
-        <button type="button" onClick={onClear} className="font-semibold active:scale-[0.96]" style={{ color: IG_BLUE }}>모두 정리</button>
+        <button type="button" onClick={onClear} className="font-semibold active:scale-[0.96]" style={{ color: ACCENT }}>모두 정리</button>
       </div>
       <ul className="min-h-0 flex-1 overflow-y-auto pb-2">{list.map(row)}</ul>
     </div>

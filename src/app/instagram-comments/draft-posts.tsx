@@ -10,7 +10,7 @@ import { Icon } from "@/components/icon";
 import { springs } from "@/components/motion/presets";
 import { postImageUrl, type Comment, type DraftJob, type MediaInfo } from "./comments-shared";
 
-const IG_BLUE = "#3797F0";
+import { ACCENT } from "./dm-blitz-card";
 const PICKABLE_POSTS = 3;
 
 type Step = { kind: "pick" } | { kind: "asking" } | { kind: "questions"; questions: string[] } | { kind: "starting" };
@@ -41,7 +41,7 @@ function PostChoice({ m, n, on, onToggle }: { m: MediaInfo; n: number; on: boole
           <span className="block truncate text-[14px] font-medium text-neutral-950">{m.captionFirstLine || "(캡션 없음)"}</span>
           <span className="block text-[12px] text-neutral-500">{m.timestamp.slice(0, 10)} · 남은 댓글 {n}개</span>
         </span>
-        <span className={`flex size-5 shrink-0 items-center justify-center rounded-full ${on ? "text-white" : "ring-1 ring-neutral-950/20"}`} style={on ? { background: IG_BLUE } : undefined}>
+        <span className={`flex size-5 shrink-0 items-center justify-center rounded-full ${on ? "text-white" : "ring-1 ring-neutral-950/20"}`} style={on ? { background: ACCENT } : undefined}>
           {on ? <Icon name="check" className="size-3.5" /> : null}
         </span>
       </button>
@@ -59,7 +59,7 @@ function PickStep({ posts, counts, picked, setPicked, error, onStart }: {
     <>
       <div className="flex items-center justify-between px-5 pt-1">
         <span className="text-[13px] text-neutral-500">최신 게시물 {posts.length}개 중에서 골라요</span>
-        <button type="button" onClick={() => setPicked(all ? new Set() : new Set(posts.map((m) => m.id)))} className="text-[13px] font-semibold" style={{ color: IG_BLUE }}>
+        <button type="button" onClick={() => setPicked(all ? new Set() : new Set(posts.map((m) => m.id)))} className="text-[13px] font-semibold" style={{ color: ACCENT }}>
           {all ? "선택 해제" : "전체 선택"}
         </button>
       </div>
@@ -68,7 +68,7 @@ function PickStep({ posts, counts, picked, setPicked, error, onStart }: {
       </ul>
       {error ? <p className="px-5 text-[12px] text-rose-600">{error}</p> : null}
       <Footer>
-        <button type="button" disabled={total === 0} onClick={onStart} className="rounded-[10px] px-4 py-2 text-[14px] font-semibold text-white disabled:opacity-40" style={{ background: IG_BLUE }}>
+        <button type="button" disabled={total === 0} onClick={onStart} className="rounded-[10px] px-4 py-2 text-[14px] font-semibold text-white disabled:opacity-40" style={{ background: ACCENT }}>
           댓글 {total}개 초안 만들기
         </button>
       </Footer>
@@ -94,7 +94,7 @@ function QuestionsStep({ questions, answers, setAnswers, onDone, onSkip }: {
       </div>
       <Footer>
         <button type="button" onClick={onSkip} className="text-[14px] font-medium text-neutral-500 hover:text-neutral-800">건너뛰고 만들기</button>
-        <button type="button" onClick={onDone} className="rounded-[10px] px-4 py-2 text-[14px] font-semibold text-white" style={{ background: IG_BLUE }}>
+        <button type="button" onClick={onDone} className="rounded-[10px] px-4 py-2 text-[14px] font-semibold text-white" style={{ background: ACCENT }}>
           초안 만들기 <span className="ml-1 text-[12px] font-normal opacity-80">⌘⏎</span>
         </button>
       </Footer>

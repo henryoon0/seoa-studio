@@ -66,7 +66,7 @@
   --border: var(--chart-grid);
 
   /* fluid 버튼 토큰 (components/ui/button.tsx). secondary 채움/hover/active 는
-     대시보드 중성 회색 계열, 포커스 링은 액션 색 규칙(emerald-700)을 따른다. */
+     대시보드 중성 회색 계열, 포커스 링은 주 색(primary)을 따른다. */
   --accent: oklch(0.925 0 0);
   --hover: rgba(10, 10, 10, 0.04);
   --active: rgba(10, 10, 10, 0.07);
@@ -76,7 +76,7 @@
      shadcn 표준 이름(bg-primary / bg-muted / text-destructive / ring-ring …)으로
      색을 참조한다. Tailwind v4 는 @theme 에 없는 이름의 유틸을 아예 만들지 않아
      토큰이 없으면 색이 통째로 사라진다 — 그래서 값이 아니라 "이름"을 잇는다.
-     primary 는 대시보드 액션 색 규칙(emerald-700)에 맞춰 둔다: 라이브러리 기본
+     primary 는 앱 주 색(잉크 네이비)에 맞춰 둔다: 라이브러리 기본
      버튼이 자동으로 우리 브랜드 색이 되고, 보라/라벤더가 새로 생기지 않는다. */
   --card: oklch(1 0 0);
   --card-foreground: var(--foreground);
@@ -89,7 +89,7 @@
   --destructive: oklch(0.577 0.245 27.325);
   --ring: var(--clobe-color-blue-500);
   --border-strong: oklch(0.87 0 0);
-  --success: oklch(0.705 0.159 160.188);
+  --success: var(--clobe-color-blue-600);
   --warning: oklch(0.769 0.165 70.08);
   /* Kakao delivery workspace. Geometry, depth, typography, and controls stay
      named here so the selected prototype remains one coherent UI system. */
@@ -145,8 +145,19 @@
 
 /* Clobe 디자인 시스템 팔레트. Tailwind 색 이름을 Clobe 토큰에 다시 잇는다.
    화면마다 클래스를 고치지 않고 한 곳에서 전체 앱의 색을 바꾸는 다리다.
-   강조(emerald)는 Clobe 정보 파랑, 경고(amber)는 주황, 위험(rose)은 빨강으로 간다. */
+   강조(emerald·sky·blue)는 주 색(잉크 네이비), 경고(amber)는 주황, 위험(rose)은 빨강으로 간다. */
 @theme {
+  /* 주 색(잉크 네이비). Figma 의 primary/50-900 과 같은 값. 파랑·에메랄드 계열 유틸은 모두 이 색을 쓴다. */
+  --color-primary-50: var(--clobe-color-blue-50);
+  --color-primary-100: var(--clobe-color-blue-100);
+  --color-primary-200: var(--clobe-color-blue-200);
+  --color-primary-300: var(--clobe-color-blue-300);
+  --color-primary-400: var(--clobe-color-blue-400);
+  --color-primary-500: var(--clobe-color-blue-500);
+  --color-primary-600: var(--clobe-color-blue-600);
+  --color-primary-700: var(--clobe-color-blue-700);
+  --color-primary-800: var(--clobe-color-blue-800);
+  --color-primary-900: var(--clobe-color-blue-900);
   --color-neutral-50: var(--clobe-color-gray-50);
   --color-neutral-100: var(--clobe-color-gray-100);
   --color-neutral-200: var(--clobe-color-gray-200);
@@ -191,17 +202,28 @@
   --color-blue-800: var(--clobe-color-blue-800);
   --color-blue-900: var(--clobe-color-blue-900);
   --color-blue-950: var(--clobe-color-blue-900);
-  --color-green-50: var(--clobe-color-green-50);
-  --color-green-100: var(--clobe-color-green-100);
-  --color-green-200: var(--clobe-color-green-200);
-  --color-green-300: var(--clobe-color-green-300);
-  --color-green-400: var(--clobe-color-green-400);
-  --color-green-500: var(--clobe-color-green-500);
-  --color-green-600: var(--clobe-color-green-600);
-  --color-green-700: var(--clobe-color-green-700);
-  --color-green-800: var(--clobe-color-green-800);
-  --color-green-900: var(--clobe-color-green-900);
-  --color-green-950: var(--clobe-color-green-900);
+  /* 초록·인디고도 주 색으로 보낸다. 앱 강조색은 네이비 하나다(2026-10-29). */
+  --color-indigo-50: var(--clobe-color-blue-50);
+  --color-indigo-100: var(--clobe-color-blue-100);
+  --color-indigo-200: var(--clobe-color-blue-200);
+  --color-indigo-300: var(--clobe-color-blue-300);
+  --color-indigo-400: var(--clobe-color-blue-400);
+  --color-indigo-500: var(--clobe-color-blue-500);
+  --color-indigo-600: var(--clobe-color-blue-600);
+  --color-indigo-700: var(--clobe-color-blue-700);
+  --color-indigo-800: var(--clobe-color-blue-800);
+  --color-indigo-900: var(--clobe-color-blue-900);
+  --color-green-50: var(--clobe-color-blue-50);
+  --color-green-100: var(--clobe-color-blue-100);
+  --color-green-200: var(--clobe-color-blue-200);
+  --color-green-300: var(--clobe-color-blue-300);
+  --color-green-400: var(--clobe-color-blue-400);
+  --color-green-500: var(--clobe-color-blue-500);
+  --color-green-600: var(--clobe-color-blue-600);
+  --color-green-700: var(--clobe-color-blue-700);
+  --color-green-800: var(--clobe-color-blue-800);
+  --color-green-900: var(--clobe-color-blue-900);
+  --color-green-950: var(--clobe-color-blue-900);
   --color-rose-50: var(--clobe-color-red-50);
   --color-rose-100: var(--clobe-color-red-100);
   --color-rose-200: var(--clobe-color-red-200);
@@ -1043,9 +1065,9 @@ video::cue {
    ring/box-shadow, Heroicons Micro.
    ══════════════════════════════════════════════════════════════ */
 @theme inline {
-  --color-brand: #00bd7d;
-  --color-brand-deep: #047857;
-  --color-brand-soft: #4fd9a8;
+  --color-brand: var(--clobe-color-blue-500);
+  --color-brand-deep: var(--clobe-color-blue-700);
+  --color-brand-soft: var(--clobe-color-blue-300);
   --color-brand-ink: #111111;
   --color-brand-paper: #ebfdf4;
 }
@@ -1224,8 +1246,8 @@ video::cue {
 }
 .note-content ul.note-checklist > li[data-checked="true"]::before {
   content: "✓";
-  background: #16a34a;
-  border-color: #16a34a;
+  background: var(--color-primary-700);
+  border-color: var(--color-primary-700);
 }
 .note-content ul.note-checklist > li[data-checked="true"] {
   color: #9ca3af;

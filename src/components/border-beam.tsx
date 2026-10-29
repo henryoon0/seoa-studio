@@ -23,7 +23,7 @@ export function BorderBeam({
   size = 80,
   duration = 4,
   delay = 0,
-  colorFrom = "#00BD7D",
+  colorFrom = "var(--color-primary-500)",
   colorTo = "#34e2a8",
   silent = false,
   className = "",
